@@ -1,4 +1,5 @@
-﻿using Contracts.Request;
+﻿using Contracts.Dtos.Request;
+using Contracts.Request;
 using Contracts.Response;
 using GarderieManagementClean.API.Extensions;
 using GarderieManagementClean.Application.Interfaces;
@@ -32,12 +33,15 @@ namespace GarderieManagementClean.API.Controllers.V1
         {
             try
             {
+
+
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState.Values.SelectMany(x => x.Errors.Select(err => err.ErrorMessage));
                     //_logger.LogInfo($"Failed to register, {errors} ");
                     return BadRequest(new Result<object>() { Errors = errors });
                 }
+
 
 
                 var authResult = await _identityService.RegisterOwnerAsync(request.Email, request.Password);
@@ -55,14 +59,14 @@ namespace GarderieManagementClean.API.Controllers.V1
             catch (Exception e)
             {
 
-                //_logger.LogError($"LoginAsync : {e.Message}");
+                //_logger.LogError($"AuthenticateAsync : {e.Message}");
                 return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
             }
         }
 
 
         [HttpPost(ApiRoutes.Identity.Login)]
-        public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
+        public async Task<IActionResult> AuthenticateAsync([FromBody] UserLoginRequest request)
         {
 
             try
@@ -75,7 +79,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(new ErrorResponse(errors));
                 }
 
-                var authResult = await _identityService.LoginAsync(request.Email, request.Password);
+                var authResult = await _identityService.AuthenticateAsync(request.Email, request.Password);
 
                 if (!authResult.Success)
                 {
@@ -89,13 +93,56 @@ namespace GarderieManagementClean.API.Controllers.V1
             catch (Exception e)
             {
 
-                //_logger.LogError($"LoginAsync : {e.Message}");
+                //_logger.LogError($"AuthenticateAsync : {e.Message}");
                 return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
 
             }
 
         }
 
+
+        [HttpGet(ApiRoutes.Identity.ConfirmEmail)]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ValidateEmailRequest validateEmailRequest)
+        {
+            try
+            {
+                var result = await _identityService.ConfirmEmailOrInvitationAsync(validateEmailRequest.userId, validateEmailRequest.Token);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
+            }
+        }
+
+
+        [HttpPost(ApiRoutes.Identity.InviteUser)]
+        public async Task<IActionResult> InviteUser([FromBody] InviteUserRequest inviteUserRequest)
+        {
+            try
+            {
+                var result = await _identityService.InviteUser(inviteUserRequest.userEmail, inviteUserRequest.role);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
+            }
+        }
 
 
         [HttpPost(ApiRoutes.Identity.RefreshToken)]

@@ -11,7 +11,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Net;
+using GarderieManagementClean.Application.Interfaces.Services;
 
 
 namespace GarderieManagementClean.Infrastructure.Identity
@@ -23,14 +24,17 @@ namespace GarderieManagementClean.Infrastructure.Identity
         private readonly JwtSettings _jwtSettings;
         private readonly ApplicationDbContext _context;
         private readonly TokenValidationParameters _tokenValidationParameters;
+        private readonly IEmailService _emailService;
 
         public IdentityRepository(
-
+            IEmailService emailService,
              UserManager<ApplicationUser> userManager,
              RoleManager<IdentityRole> roleManager,
              JwtSettings jwtSettings,
              ApplicationDbContext context, TokenValidationParameters tokenValidationParameters)
+
         {
+            _emailService = emailService;
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtSettings = jwtSettings;
@@ -38,6 +42,8 @@ namespace GarderieManagementClean.Infrastructure.Identity
             _tokenValidationParameters = tokenValidationParameters;
             // _logger = logger;
         }
+
+
         public async Task<Result<Authentication>> RegisterOwnerAsync(string email, string password)
         {
 
@@ -47,9 +53,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Email = email,
                 UserName = email,
             };
-
             var roleExist = await _roleManager.RoleExistsAsync("owner");
-
             if (!roleExist)
             {
                 return new Result<Authentication>()
@@ -59,6 +63,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
 
             }
+
             var createdUser = await _userManager.CreateAsync(newUser, password);
 
             if (!createdUser.Succeeded)
@@ -73,15 +78,113 @@ namespace GarderieManagementClean.Infrastructure.Identity
             //Assign role to newUser
             await _userManager.AddToRoleAsync(newUser, "owner");
 
+            //TODO: Send email confirmation to user
+            var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            EmailConfirmationToken = WebUtility.UrlEncode(EmailConfirmationToken);
+            await _emailService.SendEmailAsync(newUser.Email, "Email confirmation", EmailConfirmationToken, newUser.Id);
 
 
-            //create a token for successful registration 
-            return await GenerateAuthResult(newUser);
+            return new Result<Authentication>
+            {
+                Success = true,
+                Data = new { Message = "Registration successful, please confirm your email." }
+            };
+
+
 
         }
 
 
-        public async Task<Result<Authentication>> LoginAsync(string email, string password)
+        public async Task<Result<object>> InviteUser(string email, string role)
+        {
+
+
+            //check if email is already used
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to invite user '{email}', because email is already used." }
+                };
+            }
+
+            //check if role is a valid Role (exist)
+            var roleResult = await _roleManager.RoleExistsAsync(role);
+            if (!roleResult)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to invite user '{email}', because Role '{role}' does not exist." }
+                };
+            }
+
+            var newUser = new ApplicationUser
+            {
+                Email = email,
+                UserName = email
+            };
+
+            //Create new password-less User
+            var createdUser = await _userManager.CreateAsync(newUser);
+            if (!createdUser.Succeeded)
+            {
+                return new Result<object>
+                {
+                    Errors = createdUser.Errors.Select(err => err.Description)
+                };
+            };
+
+
+            //Assign role to user
+            await _userManager.AddToRoleAsync(newUser, role);
+
+            //TODO: Send invite confirmation to user
+            var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            EmailConfirmationToken = WebUtility.UrlEncode(EmailConfirmationToken);
+            await _emailService.SendEmailAsync(newUser.Email, "Email confirmation", EmailConfirmationToken, newUser.Id);
+
+            return new Result<object>
+            {
+                Success = true,
+                Data = new { Message = "Invitation successful, user needs to accept the invite." }
+            };
+
+
+
+        }
+
+
+        public async Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token)
+        {
+            var user = await this.GetCurrentUserById(userId);
+            if (user == null)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"User '{userId}' not found" }
+                };
+            }
+
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                return new Result<object>()
+                {
+                    Errors = result.Errors.Select(x => x.Description)
+                };
+            }
+            await _userManager.UpdateSecurityStampAsync(user);
+            return new Result<object>
+            {
+                Success = true,
+                Data = new { Message = "Email confirmed successfuly" }
+            };
+        }
+
+
+        public async Task<Result<Authentication>> AuthenticateAsync(string email, string password)
         {
             var existingUser = await _userManager.FindByEmailAsync(email);
 
@@ -94,6 +197,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
+
             var loginResult = await _userManager.CheckPasswordAsync(existingUser, password);
 
             if (!loginResult)
@@ -102,6 +206,14 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 {
                     //Todo: be less specific
                     Errors = new[] { "Wrong password" }
+                };
+            }
+
+            if (!existingUser.EmailConfirmed)
+            {
+                return new Result<Authentication>()
+                {
+                    Errors = new[] { "Please confirm email first" }
                 };
             }
 
@@ -212,10 +324,11 @@ namespace GarderieManagementClean.Infrastructure.Identity
             };
         }
 
-        //Helper methods
-        public async Task<ApplicationUser> GetCurrentUser(Func<string> getUserId)
+
+        #region HELPER METHODS
+        public async Task<ApplicationUser> GetCurrentUserById(string getUserId)
         {
-            var currentUser = await _userManager.FindByIdAsync(getUserId());
+            var currentUser = await _userManager.FindByIdAsync(getUserId);
             if (currentUser == null) return null;
 
             return currentUser;
@@ -258,6 +371,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
             return claims;
         }
 
+        //Generate AccessToken && RefreshToken
         private async Task<Result<Authentication>> GenerateAuthResult(ApplicationUser user)
         {
 
@@ -300,5 +414,6 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 .AddSeconds(utcExpiryDate).ToUniversalTime();
             return dateTimeValue;
         }
+        #endregion
     }
 }

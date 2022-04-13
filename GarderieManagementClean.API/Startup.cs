@@ -34,11 +34,9 @@ namespace GarderieManagementClean.API
             //Cors
             services.ConfigureCors();
 
-            //Custom LoggerService Singleton
-            services.AddSingletonLoggerService();
 
             //ApplicationDbContext
-            services.ConfigureAppDbContext(Configuration);
+            services.ConfigureApplicationDbContext(Configuration);
 
 
             //Identity
@@ -60,7 +58,9 @@ namespace GarderieManagementClean.API
             services.ConfigureSwagger();
 
             //AddScoped Services
-            services.AddScopedServicesAndRepositories();
+            services.AddServicesAndRepositories(Configuration);
+
+
 
             //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -73,7 +73,7 @@ namespace GarderieManagementClean.API
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
 
             app.UseHttpsRedirection();
 

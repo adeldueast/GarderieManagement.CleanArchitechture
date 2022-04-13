@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
+   // [ApiExplorerSettings(IgnoreApi = true)]
     [Route("api/[controller]")]
     [ApiController]
     public class RoleManagerController : ControllerBase

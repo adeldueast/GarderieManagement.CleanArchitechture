@@ -21,6 +21,11 @@
             public const string RefreshToken = Base + Account + "Refresh";
 
             public const string RevokeTokens = Base + Account + "Revoke";
+
+            public const string ConfirmEmail = Base + Account + "ConfirmEmail";
+
+            public const string InviteUser = Base + Account + "InviteUser";
+
         }
 
         public static class Garderie

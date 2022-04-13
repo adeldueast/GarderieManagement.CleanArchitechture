@@ -6,15 +6,26 @@ namespace GarderieManagementClean.Application.Interfaces
 {
     public interface IIdentityService
     {
-        public  Task<Result<Authentication>> RegisterOwnerAsync(string email, string password);
+        //Register
+        public Task<Result<Authentication>> RegisterOwnerAsync(string email, string password);
 
-        public  Task<Result<Authentication>> LoginAsync(string email, string password);
 
-        public  Task<Result<Authentication>> RefreshTokenAsync(string Token, string RefreshToken);
+        //Login
+        public Task<Result<Authentication>> AuthenticateAsync(string email, string password);
 
-        public  Task<object> RevokeTokensAsync(string userId);
 
-        //public  Task<ApplicationUser> GetCurrentUser(Func<string> getUserId);
+        //Confirm Email OR Confirm Invitation
+        public Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token);
+
+    
+
+
+        public Task<Result<object>> InviteUser(string email, string role);
+
+        //REFRESH TOKENS
+        public Task<object> RevokeTokensAsync(string userId);
+        public Task<Result<Authentication>> RefreshTokenAsync(string Token, string RefreshToken);
+
 
     }
 }

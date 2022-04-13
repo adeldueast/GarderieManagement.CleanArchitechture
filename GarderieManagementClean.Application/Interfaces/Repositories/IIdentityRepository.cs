@@ -12,10 +12,16 @@ namespace GarderieManagementClean.Application.Interfaces
 
         public Task<Result<Authentication>> RegisterOwnerAsync(string email, string password);
 
-        public Task<Result<Authentication>> LoginAsync(string email, string password);
+        public Task<Result<Authentication>> AuthenticateAsync(string email, string password);
 
         public Task<Result<Authentication>> RefreshTokenAsync(string Token, string RefreshToken);
 
+        public Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token);
+
+        public Task<Result<object>> InviteUser(string email, string role);
+
         public Task<object> RevokeTokensAsync(string userId);
+
+
     }
 }

@@ -2,6 +2,8 @@
 using GarderieManagementClean.Application.Implementation;
 using GarderieManagementClean.Application.Interfaces;
 using GarderieManagementClean.Application.Interfaces.Repositories;
+using GarderieManagementClean.Application.Interfaces.Services;
+using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Application.ServicesImplementation;
 using GarderieManagementClean.Infrastructure.Identity;
 
@@ -86,12 +88,8 @@ namespace GarderieManagementClean.API.Extensions
             });
         }
 
-        public static void AddSingletonLoggerService(this IServiceCollection services)
-        {
-            // services.AddSingleton<ILoggerManager, LoggerManager>();
-        }
 
-        public static void ConfigureAppDbContext(this IServiceCollection services, IConfiguration config)
+        public static void ConfigureApplicationDbContext(this IServiceCollection services, IConfiguration config)
         {
             // ApplicationDbContext
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -106,28 +104,29 @@ namespace GarderieManagementClean.API.Extensions
             //Identity
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
-                options.User.RequireUniqueEmail = true;
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 1;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
+
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
+
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
 
-            //services.AddIdentityCore<Employee>()
-            //    .AddRoles<IdentityRole>()
-            //    .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<Employee, IdentityRole>>()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>()
-            //    .AddDefaultTokenProviders();
 
-            //services.AddIdentityCore<Tuteur>()
-            //  .AddRoles<IdentityRole>()
-            //  .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<Tuteur, IdentityRole>>()
-            //  .AddEntityFrameworkStores<ApplicationDbContext>()
-            //  .AddDefaultTokenProviders();
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(3);
+                
+            });
+
+
+
 
         }
 
@@ -146,13 +145,23 @@ namespace GarderieManagementClean.API.Extensions
                });
         }
 
-        public static void AddScopedServicesAndRepositories(this IServiceCollection services)
+        public static void AddServicesAndRepositories(this IServiceCollection services, IConfiguration configuration)
         {
+
+            //identity service/repository
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IIdentityRepository, IdentityRepository>();
 
+
+            //garderie service/repository
             services.AddScoped<IGarderieService, GarderieService>();
             services.AddScoped<IGarderieRepository, GarderieRepository>();
+
+            //email service
+            services.AddTransient<IEmailService, EmailService>();
+
+            //TODO: Add Logger
+
 
 
 

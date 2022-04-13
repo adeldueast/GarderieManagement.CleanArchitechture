@@ -17,12 +17,17 @@ namespace GarderieManagementClean.Application.ServicesImplementation
         {
             _identityRepository = identityRepository;
         }
-        public async Task<Result<Authentication>> LoginAsync(string email, string password)
+        public async Task<Result<Authentication>> AuthenticateAsync(string email, string password)
         {
-            var AuthResult = await _identityRepository.LoginAsync(email, password);
+            var AuthResult = await _identityRepository.AuthenticateAsync(email, password);
             return AuthResult;
         }
 
+        public async Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token)
+        {
+            var result = await _identityRepository.ConfirmEmailOrInvitationAsync(userId, token);
+            return result;
+        }
         public async Task<Result<Authentication>> RefreshTokenAsync(string Token, string RefreshToken)
         {
             var AuthResult = await _identityRepository.RefreshTokenAsync(Token, RefreshToken);
@@ -40,5 +45,12 @@ namespace GarderieManagementClean.Application.ServicesImplementation
             var Result = await _identityRepository.RevokeTokensAsync(userId);
             return Result;
         }
+
+        public async Task<Result<object>> InviteUser(string email, string role)
+        {
+            var result = await _identityRepository.InviteUser(email, role);
+            return result;
+        }
+
     }
 }

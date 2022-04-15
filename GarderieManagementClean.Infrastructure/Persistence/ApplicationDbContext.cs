@@ -13,11 +13,11 @@ namespace GarderieManagementClean.Infrastructure.Persistence
         }
         public DbSet<Garderie> Garderies { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Enfant> Enfants { get; set; }
+
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-        //Discriminator ( Type of user )
-        //public DbSet<Employee> Employees { get; set; }
-        //public DbSet<Tuteur> Tuteurs { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

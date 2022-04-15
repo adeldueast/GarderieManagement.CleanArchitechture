@@ -82,6 +82,11 @@ namespace GarderieManagementClean.Infrastructure.Repositories
                 };
             }
 
+            var garderie = new Garderie
+            {
+                Name = newGarderie.Name,
+                Address = newGarderie.Address,
+            };
 
             await _context.Garderies.AddAsync(newGarderie);
             user.Garderie = newGarderie;

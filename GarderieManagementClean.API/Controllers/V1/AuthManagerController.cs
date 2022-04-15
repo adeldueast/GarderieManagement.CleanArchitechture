@@ -43,8 +43,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 }
 
 
-
-                var authResult = await _identityService.RegisterOwnerAsync(request.Email, request.Password);
+                var authResult = await _identityService.RegisterOwnerAsync(request);
 
                 if (!authResult.Success)
                 {
@@ -79,7 +78,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(new ErrorResponse(errors));
                 }
 
-                var authResult = await _identityService.AuthenticateAsync(request.Email, request.Password);
+                var authResult = await _identityService.AuthenticateAsync(request);
 
                 if (!authResult.Success)
                 {
@@ -123,12 +122,48 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
+
+        [HttpPost(ApiRoutes.Identity.CompleteRegister)]
+        public async Task<IActionResult> CompleteRegistration([FromBody] CompleteRegistrationRequest completeRegistrationRequest)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(x => x.Errors.Select(err => err.ErrorMessage));
+                    // _logger.LogInfo($"Failed to refreshToken, {errors} ");
+                    return BadRequest(new ErrorResponse(errors));
+
+                }
+
+
+                var result = await _identityService.CompleteRegistration(completeRegistrationRequest);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                //  _logger.LogError($"RefreshTokenAsync : {e.Message}, {e.InnerException.Message}");
+                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
+            }
+        }
+
+
+
         [HttpPost(ApiRoutes.Identity.InviteUser)]
         public async Task<IActionResult> InviteUser([FromBody] InviteUserRequest inviteUserRequest)
         {
             try
             {
-                var result = await _identityService.InviteUser(inviteUserRequest.userEmail, inviteUserRequest.role);
+
+                var userId = HttpContext.GetUserId();
+                var result = await _identityService.InviteUser(userId, inviteUserRequest.Email, inviteUserRequest.role);
 
                 if (!result.Success)
                 {
@@ -159,7 +194,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
                 }
-                var authResult = await _identityService.RefreshTokenAsync(tokenRequest.AccessToken, tokenRequest.RefreshToken);
+                var authResult = await _identityService.RefreshTokenAsync(tokenRequest);
 
                 if (!authResult.Success)
                 {
@@ -189,7 +224,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             {
                 return BadRequest(new { Errors = new[] { $"User with id '{userId}' not found" } });
             }
-            var deletedTokens = await _identityService.RevokeTokensAsync(HttpContext.GetUserId());
+            var deletedTokens = await _identityService.RevokeTokensAsync(userId);
 
             return Ok(deletedTokens);
 

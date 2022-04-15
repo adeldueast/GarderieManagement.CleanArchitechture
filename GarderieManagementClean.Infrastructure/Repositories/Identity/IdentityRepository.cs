@@ -13,7 +13,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using GarderieManagementClean.Application.Interfaces.Services;
-
+using Contracts.Dtos.Request;
+using Contracts.Request;
+using System.Diagnostics;
 
 namespace GarderieManagementClean.Infrastructure.Identity
 {
@@ -43,15 +45,14 @@ namespace GarderieManagementClean.Infrastructure.Identity
             // _logger = logger;
         }
 
-
-        public async Task<Result<Authentication>> RegisterOwnerAsync(string email, string password)
+        public async Task<Result<Authentication>> RegisterOwnerAsync(UserRegistrationRequest userRegistrationRequest)
         {
 
 
             var newUser = new ApplicationUser
             {
-                Email = email,
-                UserName = email,
+                Email = userRegistrationRequest.Email,
+                UserName = userRegistrationRequest.Email,
             };
             var roleExist = await _roleManager.RoleExistsAsync("owner");
             if (!roleExist)
@@ -64,7 +65,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
             }
 
-            var createdUser = await _userManager.CreateAsync(newUser, password);
+            var createdUser = await _userManager.CreateAsync(newUser, userRegistrationRequest.Password);
 
             if (!createdUser.Succeeded)
             {
@@ -87,15 +88,18 @@ namespace GarderieManagementClean.Infrastructure.Identity
             return new Result<Authentication>
             {
                 Success = true,
-                Data = new { Message = "Registration successful, please confirm your email." }
+                Data = new
+                {
+                    UserId = newUser.Id,
+                    Message = "Registrated successfuly, please confirm your email."
+                }
             };
 
 
 
         }
 
-
-        public async Task<Result<object>> InviteUser(string email, string role)
+        public async Task<Result<object>> InviteUser(string userId, string email, string role)
         {
 
 
@@ -109,6 +113,22 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
+            var currentUser = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to invite user '{email}', because user '{userId}' doesnt exist." }
+                };
+            }
+            if (currentUser.GarderieId is null)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to invite user '{email}', because there is no existing garderie. Create one before you invite users." }
+                };
+            }
+
             //check if role is a valid Role (exist)
             var roleResult = await _roleManager.RoleExistsAsync(role);
             if (!roleResult)
@@ -118,11 +138,19 @@ namespace GarderieManagementClean.Infrastructure.Identity
                     Errors = new List<string>() { $"Failed to invite user '{email}', because Role '{role}' does not exist." }
                 };
             }
+            if (role == "owner")
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to invite user '{email}', because you cannot invite new users as owners." }
+                };
+            }
 
             var newUser = new ApplicationUser
             {
                 Email = email,
-                UserName = email
+                UserName = email,
+                GarderieId = currentUser.GarderieId,
             };
 
             //Create new password-less User
@@ -134,6 +162,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                     Errors = createdUser.Errors.Select(err => err.Description)
                 };
             };
+
 
 
             //Assign role to user
@@ -154,9 +183,56 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
         }
 
+        public async Task<Result<object>> CompleteRegistration(CompleteRegistrationRequest completeRegistrationRequest)
+        {
+
+            var user = await _userManager.FindByIdAsync(completeRegistrationRequest.userId);
+            if (user == null)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to complete registration because user '{completeRegistrationRequest.userId}' was not found" }
+                };
+            }
+
+            //Check if user has confirmed their email first
+            var emailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+            if (!emailConfirmed)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to complete registration because user '{completeRegistrationRequest.userId}' has not confirmed their email yet." }
+                };
+            }
+
+            //Check if user has already completed registration (has a password)
+            var hasPassword = await _userManager.HasPasswordAsync(user);
+            if (hasPassword)
+            {
+                return new Result<object>()
+                {
+                    Errors = new List<string>() { $"Failed to complete registration because user '{completeRegistrationRequest.userId}' has already completed registration." }
+                };
+            }
+
+
+            user.FirstName = completeRegistrationRequest.FirstName;
+            user.LastName = completeRegistrationRequest.LastName;
+
+            await _userManager.AddPasswordAsync(user, completeRegistrationRequest.Password);
+
+            return new Result<object>
+            {
+                Success = true,
+                Data = new { Message = "Completed registration successfuly." }
+            };
+
+
+        }
 
         public async Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token)
         {
+
             var user = await this.GetCurrentUserById(userId);
             if (user == null)
             {
@@ -166,27 +242,54 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
+            user.EmailConfirmed = true;
+            await _context.SaveChangesAsync();
 
-            var result = await _userManager.ConfirmEmailAsync(user, token);
-            if (!result.Succeeded)
-            {
-                return new Result<object>()
-                {
-                    Errors = result.Errors.Select(x => x.Description)
-                };
-            }
-            await _userManager.UpdateSecurityStampAsync(user);
+
             return new Result<object>
             {
                 Success = true,
-                Data = new { Message = "Email confirmed successfuly" }
+                Data = new
+                {
+                    UserId = user.Id,
+                    Message = "Email confirmed successfully"
+                }
             };
+
+            /*---------------------------------------------------*/
+
+            //var user = await this.GetCurrentUserById(userId);
+            //if (user == null)
+            //{
+            //    return new Result<object>()
+            //    {
+            //        Errors = new List<string>() { $"User '{userId}' not found" }
+            //    };
+            //}
+
+            //var result = await _userManager.ConfirmEmailAsync(user, token);
+            //if (!result.Succeeded)
+            //{
+            //    return new Result<object>()
+            //    {
+            //        Errors = result.Errors.Select(x => x.Description)
+            //    };
+            //}
+            ////await _userManager.UpdateSecurityStampAsync(user);
+            //return new Result<object>
+            //{
+            //    Success = true,
+            //    Data = new
+            //    {
+            //        UserId = user.Id,
+            //        Message = "Email confirmed successfully"
+            //    }
+            //};
         }
 
-
-        public async Task<Result<Authentication>> AuthenticateAsync(string email, string password)
+        public async Task<Result<Authentication>> AuthenticateAsync(UserLoginRequest userLoginRequest)
         {
-            var existingUser = await _userManager.FindByEmailAsync(email);
+            var existingUser = await _userManager.FindByEmailAsync(userLoginRequest.Email);
 
             if (existingUser == null)
             {
@@ -197,8 +300,27 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
+            var emailConfirmed = await _userManager.IsEmailConfirmedAsync(existingUser);
 
-            var loginResult = await _userManager.CheckPasswordAsync(existingUser, password);
+            if (!emailConfirmed)
+            {
+                return new Result<Authentication>()
+                {
+                    Errors = new[] { "Please verify your email first" }
+                };
+            }
+
+            var hasPassword = await _userManager.HasPasswordAsync(existingUser);
+
+            if (!hasPassword)
+            {
+                return new Result<Authentication>()
+                {
+                    Errors = new[] { "Please finish setting up your account first" }
+                };
+            }
+
+            var loginResult = await _userManager.CheckPasswordAsync(existingUser, userLoginRequest.Password);
 
             if (!loginResult)
             {
@@ -221,14 +343,13 @@ namespace GarderieManagementClean.Infrastructure.Identity
             return await GenerateAuthResult(existingUser); ;
         }
 
-
-        public async Task<Result<Authentication>> RefreshTokenAsync(string Token, string RefreshToken)
+        public async Task<Result<Authentication>> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             try
             {
                 //1) Validation 1 - validate JWT token format
-                var tokenInVerification = jwtTokenHandler.ValidateToken(Token, _tokenValidationParameters, out var validatedToken);
+                var tokenInVerification = jwtTokenHandler.ValidateToken(refreshTokenRequest.AccessToken, _tokenValidationParameters, out var validatedToken);
 
 
                 //2) Validation 2 - validate encryption algorithm, checks if the jwt token has been encrypted using the encryption that we have specified.
@@ -259,7 +380,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 }
 
                 //4) Validation 4 - validate existence of the token in the database
-                var storedToken = await _context.RefreshTokens.FindAsync(RefreshToken);
+                var storedToken = await _context.RefreshTokens.FindAsync(refreshTokenRequest.RefreshToken);
 
                 if (storedToken == null)
                 {
@@ -309,7 +430,6 @@ namespace GarderieManagementClean.Infrastructure.Identity
             }
         }
 
-
         public async Task<object> RevokeTokensAsync(string userId)
         {
             var tokens = await _context.RefreshTokens.Where(token => token.UserId == userId).ToListAsync();
@@ -323,7 +443,6 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Data = new { tokens_deleted = tokens }
             };
         }
-
 
         #region HELPER METHODS
         public async Task<ApplicationUser> GetCurrentUserById(string getUserId)
@@ -383,7 +502,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddSeconds(30),//token will expire in X minutes/seconds
+                Expires = DateTime.UtcNow.AddMinutes(10),//token will expire in X minutes/seconds
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

@@ -11,14 +11,13 @@ namespace GarderieManagementClean.Application.Implementation
 {
     public class EmailService : IEmailService
     {
-        public EmailService()
-        {
-
-        }
+        public EmailService() { } 
         public async Task SendEmailAsync(string toEmail, string subject, string token, string userId)
         {
-            string fromMail = "";
-            string fromPassword = "";
+
+
+            string fromMail = "kouaoum80@gmail.com";
+            string fromPassword = "Ihaveps450514$";
 
             MailMessage message = new MailMessage()
             {
@@ -28,16 +27,14 @@ namespace GarderieManagementClean.Application.Implementation
 
                 $"<p> Please click the button below to confirm your email/accept invitation</p> <br>" +
 
-                $"<a  style=\"color:white;background-color: green; text-align: center; padding: 0 1rem 0 1rem \" href=\"https://localhost:44356/api/v1/Account/ConfirmEmail?userId={userId}&token={token}\" > confirm email </a>" +
-
-
-
+                $"<a  style=\"color:white;background-color: green; text-align: center; padding: 0 1rem 0 1rem \" " +
+                $"href=\"https://localhost:44356/api/v1/Account/ConfirmEmail?userId={userId}&token={token}\" > confirm email </a>" +
 
                 $"</body></html>",
                 IsBodyHtml = true
             };
             message.To.Add(new MailAddress(toEmail));
-            
+
             var smtpClient = new SmtpClient("smtp.gmail.com")
             {
                 Port = 587,

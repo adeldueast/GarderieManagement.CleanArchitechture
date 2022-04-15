@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
-    public partial class initmigration : Migration
+    public partial class AddedIdentityAndGarderie : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -1,4 +1,6 @@
-﻿using GarderieManagementClean.Application.Interfaces;
+﻿using Contracts.Dtos.Request;
+using Contracts.Request;
+using GarderieManagementClean.Application.Interfaces;
 using GarderieManagementClean.Application.Models;
 using System;
 using System.Collections.Generic;
@@ -17,26 +19,28 @@ namespace GarderieManagementClean.Application.ServicesImplementation
         {
             _identityRepository = identityRepository;
         }
-        public async Task<Result<Authentication>> AuthenticateAsync(string email, string password)
+
+        public async Task<Result<Authentication>> AuthenticateAsync(UserLoginRequest userLoginRequest)
         {
-            var AuthResult = await _identityRepository.AuthenticateAsync(email, password);
+            var AuthResult = await _identityRepository.AuthenticateAsync(userLoginRequest);
             return AuthResult;
         }
 
-        public async Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token)
+        public async Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId,string token)
         {
             var result = await _identityRepository.ConfirmEmailOrInvitationAsync(userId, token);
             return result;
         }
-        public async Task<Result<Authentication>> RefreshTokenAsync(string Token, string RefreshToken)
+
+        public async Task<Result<Authentication>> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
-            var AuthResult = await _identityRepository.RefreshTokenAsync(Token, RefreshToken);
+            var AuthResult = await _identityRepository.RefreshTokenAsync(refreshTokenRequest);
             return AuthResult;
         }
 
-        public async Task<Result<Authentication>> RegisterOwnerAsync(string email, string password)
+        public async Task<Result<Authentication>> RegisterOwnerAsync(UserRegistrationRequest userRegistrationRequest)
         {
-            var AuthResult = await _identityRepository.RegisterOwnerAsync(email, password);
+            var AuthResult = await _identityRepository.RegisterOwnerAsync(userRegistrationRequest);
             return AuthResult;
         }
 
@@ -46,11 +50,16 @@ namespace GarderieManagementClean.Application.ServicesImplementation
             return Result;
         }
 
-        public async Task<Result<object>> InviteUser(string email, string role)
+        public async Task<Result<object>> InviteUser(string userId, string email, string role)
         {
-            var result = await _identityRepository.InviteUser(email, role);
+            var result = await _identityRepository.InviteUser( userId, email, role);
             return result;
         }
 
+        public async Task<Result<object>> CompleteRegistration( CompleteRegistrationRequest completeRegistrationRequest)
+        {
+            var result = await _identityRepository.CompleteRegistration(completeRegistrationRequest);
+            return result;
+        }
     }
 }

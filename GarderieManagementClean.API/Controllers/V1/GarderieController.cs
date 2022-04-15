@@ -35,6 +35,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         {
             var userId = HttpContext.GetUserId();
 
+
             var result = await _garderieService.getGarderie(userId);
 
             //if (garderieDomain == null) return NotFound();

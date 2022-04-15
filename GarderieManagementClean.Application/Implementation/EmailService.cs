@@ -11,13 +11,10 @@ namespace GarderieManagementClean.Application.Implementation
 {
     public class EmailService : IEmailService
     {
-        public EmailService() { } 
         public async Task SendEmailAsync(string toEmail, string subject, string token, string userId)
         {
-
-
-            string fromMail = "kouaoum80@gmail.com";
-            string fromPassword = "Ihaveps450514$";
+            string fromMail = "";
+            string fromPassword = "";
 
             MailMessage message = new MailMessage()
             {
@@ -45,8 +42,6 @@ namespace GarderieManagementClean.Application.Implementation
             await smtpClient.SendMailAsync(message);
 
             smtpClient.Dispose();
-
-
 
         }
     }

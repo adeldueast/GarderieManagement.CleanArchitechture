@@ -114,7 +114,7 @@ namespace GarderieManagementClean.API.Extensions
                 options.Password.RequireUppercase = false;
 
                 options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedEmail = true;
+                //options.SignIn.RequireConfirmedEmail = true;
 
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()

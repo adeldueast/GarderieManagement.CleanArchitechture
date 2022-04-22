@@ -50,9 +50,9 @@ namespace GarderieManagementClean.Application.ServicesImplementation
             return Result;
         }
 
-        public async Task<Result<object>> InviteUser(string userId, string email, string role)
+        public async Task<Result<object>> InviteUser(string userId, UserInviteUserRequest inviteUserRequest)
         {
-            var result = await _identityRepository.InviteUser( userId, email, role);
+            var result = await _identityRepository.InviteUser( userId,  inviteUserRequest);
             return result;
         }
 

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
@@ -22,7 +23,6 @@ namespace GarderieManagementClean.API.Controllers.V1
         private readonly IIdentityService _identityService;
         public AuthManagerController(IIdentityService identityService)
         {
-
             _identityService = identityService;
         }
 
@@ -33,13 +33,6 @@ namespace GarderieManagementClean.API.Controllers.V1
             try
             {
 
-
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values.SelectMany(x => x.Errors.Select(err => err.ErrorMessage));
-                    //_logger.LogInfo($"Failed to register, {errors} ");
-                    return BadRequest(new Result<object>() { Errors = errors });
-                }
 
 
                 var authResult = await _identityService.RegisterOwnerAsync(request);
@@ -98,7 +91,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
-
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet(ApiRoutes.Identity.ConfirmEmail)]
         public async Task<IActionResult> ConfirmEmail([FromQuery] UserValidateEmailRequest validateEmailRequest)
         {
@@ -122,7 +115,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPost(ApiRoutes.Identity.CompleteRegister)]
         public async Task<IActionResult> CompleteRegistration([FromBody] UserCompleteRegistrationRequest completeRegistrationRequest)
         {
@@ -164,7 +157,8 @@ namespace GarderieManagementClean.API.Controllers.V1
             {
 
                 var userId = HttpContext.GetUserId();
-                var result = await _identityService.InviteUser(userId, inviteUserRequest.Email, inviteUserRequest.role);
+                var result = await _identityService.InviteUser(userId, inviteUserRequest);
+
 
                 if (!result.Success)
                 {
@@ -181,8 +175,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost(ApiRoutes.Identity.RefreshToken)]
         public async Task<IActionResult> RefreshTokenAsync([FromBody] UserRefreshTokenRequest tokenRequest)
         {

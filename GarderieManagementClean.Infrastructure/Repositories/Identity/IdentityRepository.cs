@@ -70,7 +70,6 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
             if (!createdUser.Succeeded)
             {
-
                 return new Result<Authentication>
                 {
                     Errors = createdUser.Errors.Select(err => err.Description)
@@ -102,17 +101,17 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
         }
 
-        public async Task<Result<object>> InviteUser(string userId, string email, string role)
+        public async Task<Result<object>> InviteUser(string userId, UserInviteUserRequest inviteUserRequest)
         {
 
 
             //check if email is already used
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(inviteUserRequest.Email);
             if (user != null)
             {
                 return new Result<object>()
                 {
-                    Errors = new List<string>() { $"Failed to invite user '{email}', because email is already used." }
+                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because email is already used." }
                 };
             }
 
@@ -121,43 +120,44 @@ namespace GarderieManagementClean.Infrastructure.Identity
             {
                 return new Result<object>()
                 {
-                    Errors = new List<string>() { $"Failed to invite user '{email}', because user '{userId}' doesnt exist." }
+                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because user '{userId}' doesnt exist." }
                 };
             }
             if (currentUser.GarderieId is null)
             {
                 return new Result<object>()
                 {
-                    Errors = new List<string>() { $"Failed to invite user '{email}', because there is no existing garderie. Create one before you invite users." }
+                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because there is no existing garderie. Create one before you invite users." }
                 };
             }
 
             //check if role is a valid Role (exist)
-            var roleResult = await _roleManager.RoleExistsAsync(role);
+            var roleResult = await _roleManager.RoleExistsAsync(inviteUserRequest.Role);
             if (!roleResult)
             {
                 return new Result<object>()
                 {
-                    Errors = new List<string>() { $"Failed to invite user '{email}', because Role '{role}' does not exist." }
+                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because Role '{inviteUserRequest.Role}' does not exist." }
                 };
             }
-            if (role == "owner")
+
+            if (inviteUserRequest.Role == "owner")
             {
                 return new Result<object>()
                 {
-                    Errors = new List<string>() { $"Failed to invite user '{email}', because you can only invite users as employees or parents" }
+                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because you can only invite users as employees or tutors" }
                 };
             }
 
             var newUser = new ApplicationUser
             {
-                Email = email,
-                UserName = email,
+                Email = inviteUserRequest.Email,
+                UserName = inviteUserRequest.Email,
                 GarderieId = currentUser.GarderieId,
             };
 
             //Create new password-less User
-            var createdUser = await _userManager.CreateAsync(newUser);
+            var createdUser = await _userManager.CreateAsync(newUser, "password");
             if (!createdUser.Succeeded)
             {
                 return new Result<object>
@@ -167,9 +167,8 @@ namespace GarderieManagementClean.Infrastructure.Identity
             };
 
 
-
             //Assign role to user
-            await _userManager.AddToRoleAsync(newUser, role);
+            await _userManager.AddToRoleAsync(newUser, inviteUserRequest.Role);
 
             //TODO: Send invite confirmation to user
             var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
@@ -204,24 +203,24 @@ namespace GarderieManagementClean.Infrastructure.Identity
             }
 
             //Check if user has confirmed their email first
-            var emailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
-            if (!emailConfirmed)
-            {
-                return new Result<object>()
-                {
-                    Errors = new List<string>() { $"Failed to complete registration because user '{completeRegistrationRequest.userId}' has not confirmed their email yet." }
-                };
-            }
+            //var emailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+            //if (!emailConfirmed)
+            //{
+            //    return new Result<object>()
+            //    {
+            //        Errors = new List<string>() { $"Failed to complete registration because user '{completeRegistrationRequest.userId}' has not confirmed their email yet." }
+            //    };
+            //}
 
             //Check if user has already completed registration (has a password)
-            var hasPassword = await _userManager.HasPasswordAsync(user);
-            if (hasPassword)
-            {
-                return new Result<object>()
-                {
-                    Errors = new List<string>() { $"Failed to complete registration because user '{completeRegistrationRequest.userId}' has already completed registration." }
-                };
-            }
+            //var hasPassword = await _userManager.HasPasswordAsync(user);
+            //if (hasPassword)
+            //{
+            //    return new Result<object>()
+            //    {
+            //        Errors = new List<string>() { $"Failed to complete registration because user '{completeRegistrationRequest.userId}' has already completed registration." }
+            //    };
+            //}
 
 
             user.FirstName = completeRegistrationRequest.FirstName;
@@ -274,7 +273,6 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
         }
 
-
         public async Task<Result<Authentication>> AuthenticateAsync(UserLoginRequest userLoginRequest)
         {
             var existingUser = await _userManager.FindByEmailAsync(userLoginRequest.Email);
@@ -288,15 +286,15 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
-            var emailConfirmed = await _userManager.IsEmailConfirmedAsync(existingUser);
+            //var emailConfirmed = await _userManager.IsEmailConfirmedAsync(existingUser);
 
-            if (!emailConfirmed)
-            {
-                return new Result<Authentication>()
-                {
-                    Errors = new[] { "Please verify your email first" }
-                };
-            }
+            //if (!emailConfirmed)
+            //{
+            //    return new Result<Authentication>()
+            //    {
+            //        Errors = new[] { "Please verify your email first" }
+            //    };
+            //}
 
             var hasPassword = await _userManager.HasPasswordAsync(existingUser);
 
@@ -319,13 +317,13 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
-            if (!existingUser.EmailConfirmed)
-            {
-                return new Result<Authentication>()
-                {
-                    Errors = new[] { "Please confirm email first" }
-                };
-            }
+            //if (!existingUser.EmailConfirmed)
+            //{
+            //    return new Result<Authentication>()
+            //    {
+            //        Errors = new[] { "Please confirm email first" }
+            //    };
+            //}
 
             //create jwtToken & refreshToken for successful login 
             return await GenerateAuthResult(existingUser); ;
@@ -432,8 +430,9 @@ namespace GarderieManagementClean.Infrastructure.Identity
             };
         }
 
+
         #region HELPER METHODS
-        public async Task<ApplicationUser> GetCurrentUserById(string getUserId)
+        private async Task<ApplicationUser> GetCurrentUserById(string getUserId)
         {
             var currentUser = await _userManager.FindByIdAsync(getUserId);
             if (currentUser == null) return null;

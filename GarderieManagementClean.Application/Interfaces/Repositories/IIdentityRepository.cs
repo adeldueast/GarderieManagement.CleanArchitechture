@@ -14,7 +14,7 @@ namespace GarderieManagementClean.Application.Interfaces
 
         public Task<Result<Authentication>> RegisterOwnerAsync(UserRegistrationRequest userRegistrationRequest);
 
-        public Task<Result<object>> InviteUser(string userId, string email, string role);
+        public Task<Result<object>> InviteUser(string userId, UserInviteUserRequest inviteUserRequest);
 
         public Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token);
 

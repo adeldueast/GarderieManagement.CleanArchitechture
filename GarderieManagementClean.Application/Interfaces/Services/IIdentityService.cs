@@ -23,7 +23,7 @@ namespace GarderieManagementClean.Application.Interfaces
         public Task<Result<object>> CompleteRegistration( UserCompleteRegistrationRequest completeRegistrationRequest);
 
 
-        public Task<Result<object>> InviteUser(string userId,string email, string role);
+        public Task<Result<object>> InviteUser(string userId, UserInviteUserRequest inviteUserRequest);
 
         //REFRESH TOKENS
         public Task<object> RevokeTokensAsync(string userId);

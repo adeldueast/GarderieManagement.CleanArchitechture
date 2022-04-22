@@ -13,9 +13,15 @@ namespace GarderieManagementClean.API.MapperProfiles
         public GroupProfile()
         {
 
-            CreateMap<GroupRequest, Group>().ReverseMap();
+            CreateMap<GroupCreateRequest, Group>().ReverseMap();
 
-            CreateMap<GroupResponse, Group>().ReverseMap();
+
+
+            CreateMap<GroupResponse, Group>();
+            CreateMap<Group, GroupResponse>();
+            CreateMap<GroupResponse, object>();
+            CreateMap<object, GroupResponse>();
+
         }
     }
 }

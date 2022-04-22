@@ -16,6 +16,11 @@ namespace GarderieManagementClean.Application.Implementation
     {
 
         public IGroupRepository _groupRepository { get; }
+
+        public GroupService(IGroupRepository groupRepository)
+        {
+            _groupRepository = groupRepository;
+        }
         public Task<Result<Group>> createGroup(string userId, Group newGroup)
         {
             return _groupRepository.createGroup(userId, newGroup);

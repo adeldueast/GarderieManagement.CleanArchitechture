@@ -18,11 +18,11 @@ namespace GarderieManagementClean.Application.Interfaces
 
         public Task<Result<object>> ConfirmEmailOrInvitationAsync(string userId, string token);
 
-        public Task<Result<object>> CompleteRegistration(CompleteRegistrationRequest completeRegistrationRequest);
+        public Task<Result<object>> CompleteRegistration(UserCompleteRegistrationRequest completeRegistrationRequest);
 
         public Task<Result<Authentication>> AuthenticateAsync(UserLoginRequest userLoginRequest);
 
-        public Task<Result<Authentication>> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest);
+        public Task<Result<Authentication>> RefreshTokenAsync(UserRefreshTokenRequest refreshTokenRequest);
 
 
 

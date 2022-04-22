@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Contracts.Dtos.Request
 {
-    public class InviteUserRequest
+    public class GroupUpdateRequest
     {
-        public string Email { get; set; }
-        public string role { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        public string Photo { get; set; }
     }
 }

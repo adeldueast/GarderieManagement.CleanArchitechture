@@ -19,7 +19,6 @@ namespace GarderieManagementClean.API.Controllers.V1
     public class AuthManagerController : ControllerBase
     {
 
-
         private readonly IIdentityService _identityService;
         public AuthManagerController(IIdentityService identityService)
         {
@@ -101,16 +100,17 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
         [HttpGet(ApiRoutes.Identity.ConfirmEmail)]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] ValidateEmailRequest validateEmailRequest)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] UserValidateEmailRequest validateEmailRequest)
         {
             try
             {
-                var result = await _identityService.ConfirmEmailOrInvitationAsync(validateEmailRequest.userId, validateEmailRequest.Token);
+                var result = await _identityService.ConfirmEmailOrInvitationAsync(validateEmailRequest.userId, validateEmailRequest.ConfirmEmailToken);
 
                 if (!result.Success)
                 {
                     return BadRequest(result);
                 }
+                //TODO: Redirect to client complete-registration page & include userId in 
 
                 return Ok(result);
             }
@@ -124,7 +124,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
         [HttpPost(ApiRoutes.Identity.CompleteRegister)]
-        public async Task<IActionResult> CompleteRegistration([FromBody] CompleteRegistrationRequest completeRegistrationRequest)
+        public async Task<IActionResult> CompleteRegistration([FromBody] UserCompleteRegistrationRequest completeRegistrationRequest)
         {
             try
             {
@@ -156,8 +156,9 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost(ApiRoutes.Identity.InviteUser)]
-        public async Task<IActionResult> InviteUser([FromBody] InviteUserRequest inviteUserRequest)
+        public async Task<IActionResult> InviteUser([FromBody] UserInviteUserRequest inviteUserRequest)
         {
             try
             {
@@ -180,8 +181,10 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
+
+
         [HttpPost(ApiRoutes.Identity.RefreshToken)]
-        public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest tokenRequest)
+        public async Task<IActionResult> RefreshTokenAsync([FromBody] UserRefreshTokenRequest tokenRequest)
         {
 
             try
@@ -213,6 +216,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
 
         }
+
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

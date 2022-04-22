@@ -9,7 +9,7 @@ namespace GarderieManagementClean.API.MapperProfiles
     {
         public GarderieProfile()
         {
-            CreateMap<GarderieRequest, Garderie>().ReverseMap();
+            CreateMap<GarderieCreateRequest, Garderie>().ReverseMap();
 
             CreateMap<GarderieResponse, Garderie>().ReverseMap();
 

@@ -52,22 +52,7 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Garderie", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Garderies");
-                });
-
-            modelBuilder.Entity("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", b =>
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -146,7 +131,76 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("GarderieManagementClean.Infrastructure.Identity.RefreshToken", b =>
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("DateNaissance")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nom")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("Enfants");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Garderie", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Garderies");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Group", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("GarderieId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GarderieId");
+
+                    b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<string>("Token")
                         .ValueGeneratedOnAdd()
@@ -175,6 +229,24 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.TutorEnfant", b =>
+                {
+                    b.Property<int>("EnfantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Relation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("EnfantId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TutorEnfant");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -319,22 +391,65 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Navigation("Garderie");
                 });
 
-            modelBuilder.Entity("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", b =>
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.ApplicationUser", b =>
                 {
                     b.HasOne("GarderieManagementClean.Domain.Entities.Garderie", "Garderie")
-                        .WithMany()
+                        .WithMany("ApplicationUsers")
                         .HasForeignKey("GarderieId");
 
                     b.Navigation("Garderie");
                 });
 
-            modelBuilder.Entity("GarderieManagementClean.Infrastructure.Identity.RefreshToken", b =>
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
                 {
-                    b.HasOne("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", "ApplicationUser")
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", null)
+                        .WithMany("Enfants")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Group", "Group")
+                        .WithMany("Enfants")
+                        .HasForeignKey("GroupId");
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Group", b =>
+                {
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Garderie", "Garderie")
+                        .WithMany("Groups")
+                        .HasForeignKey("GarderieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Garderie");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "ApplicationUser")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId");
 
                     b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.TutorEnfant", b =>
+                {
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
+                        .WithMany("Tutors")
+                        .HasForeignKey("EnfantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Enfant");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -348,7 +463,7 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", null)
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -357,7 +472,7 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", null)
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -372,7 +487,7 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", null)
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -381,21 +496,18 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", null)
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", null)
                         .WithMany("Tokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Garderie", b =>
-                {
-                    b.Navigation("Address");
-                });
-
-            modelBuilder.Entity("GarderieManagementClean.Infrastructure.Identity.ApplicationUser", b =>
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Claims");
+
+                    b.Navigation("Enfants");
 
                     b.Navigation("Logins");
 
@@ -404,6 +516,25 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Navigation("Tokens");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
+                {
+                    b.Navigation("Tutors");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Garderie", b =>
+                {
+                    b.Navigation("Address");
+
+                    b.Navigation("ApplicationUsers");
+
+                    b.Navigation("Groups");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Group", b =>
+                {
+                    b.Navigation("Enfants");
                 });
 #pragma warning restore 612, 618
         }

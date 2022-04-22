@@ -149,14 +149,16 @@ namespace GarderieManagementClean.Infrastructure.Repositories
         public async Task<Result<Garderie>> deleteGarderie(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 return new Result<Garderie>()
                 {
-                    Errors = new string[] { "User is null" },
+                    Errors = new string[] { "User not found" },
                     Data = null
                 };
             }
+
             if (user.GarderieId == null)
             {
                 return new Result<Garderie>()
@@ -165,7 +167,14 @@ namespace GarderieManagementClean.Infrastructure.Repositories
                     Data = null
                 };
             }
-            var garderie = await _context.Garderies.Include("Address").FirstOrDefaultAsync(g => g.Id == user.GarderieId);
+
+            var users = _context.Users.Where(x => x.GarderieId == user.GarderieId).Include("Garderie");
+            foreach (var u in users)
+            {
+                u.Garderie = null;
+            }
+
+            var garderie = await _context.Garderies.Include("Address").SingleOrDefaultAsync(g => g.Id == user.GarderieId);
             _context.Remove(garderie);
             await _context.SaveChangesAsync();
 

@@ -18,9 +18,9 @@
 
             public const string Register = Base + Account + "Register";
 
-            public const string RefreshToken = Base + Account + "Refresh";
+            public const string RefreshToken = Base + Account + "RefreshToken";
 
-            public const string RevokeTokens = Base + Account + "Revoke";
+            public const string RevokeTokens = Base + Account + "RevokeTokens";
 
             public const string ConfirmEmail = Base + Account + "ConfirmEmail";
             
@@ -51,7 +51,7 @@
         {
             public const string group = "Group/";
 
-            public const string Get = Base + group + "Get/{groupId}";
+            public const string Get = Base + group + "Get/{groupId:int}";
 
             public const string GetAll = Base + group + "Get/";
 
@@ -59,7 +59,7 @@
 
             public const string Update = Base + group + "Update";
 
-            public const string Delete = Base + group + "Delete/{groupId}";
+            public const string Delete = Base + group + "Delete/{groupId:int}";
         }
     }
 }

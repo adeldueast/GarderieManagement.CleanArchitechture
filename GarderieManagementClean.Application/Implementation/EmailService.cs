@@ -13,8 +13,8 @@ namespace GarderieManagementClean.Application.Implementation
     {
         public async Task SendEmailAsync(string toEmail, string subject, string token, string userId)
         {
-            string fromMail = "";
-            string fromPassword = "";
+            string fromMail = "kouaoum80@gmail.com";
+            string fromPassword = "Ihaveps450514$";
 
             MailMessage message = new MailMessage()
             {

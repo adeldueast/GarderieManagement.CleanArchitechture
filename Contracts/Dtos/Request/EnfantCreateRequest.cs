@@ -4,13 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GarderieManagementClean.Domain.Entities
+namespace Contracts.Dtos.Request
 {
-    public class Enfant
-    { 
-
-        public int Id { get; set; }
-
+    public class EnfantCreateRequest
+    {
         public string Nom { get; set; }
 
         public DateTime DateNaissance { get; set; }
@@ -19,10 +16,7 @@ namespace GarderieManagementClean.Domain.Entities
 
         public int? GroupId { get; set; }
 
-        public Group Group { get; set; }
-
-        public List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
-
+        public List<TutorRelation> Tutors { get; set; }
 
     }
 }

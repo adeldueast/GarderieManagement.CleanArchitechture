@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace Contracts.Dtos.Request
 {
-    public class ValidateEmailRequest
+    public class UserCompleteRegistrationRequest
     {
         public string userId { get; set; }
-        public string Token { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Password { get; set; }
+
     }
 }

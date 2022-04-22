@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class GroupController : ControllerBase
     {
@@ -26,7 +26,6 @@ namespace GarderieManagementClean.API.Controllers.V1
             _groupService = groupService;
             _mapper = mapper;
         }
-
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,employee,admin")]
         [HttpGet(ApiRoutes.Group.Get)]
@@ -52,7 +51,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             var userId = HttpContext.GetUserId();
 
             var result = await _groupService.getAllGroups(userId);
-
+         
             if (result.Success)
             {
                 result.Data = _mapper.Map<GroupResponse>(result.Data);
@@ -64,7 +63,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin")]
         [HttpPost(ApiRoutes.Group.Create)]
-        public async Task<IActionResult> createGroup([FromBody] GroupRequest createGroupRequest)
+        public async Task<IActionResult> createGroup([FromBody] GroupCreateRequest createGroupRequest)
         {
             var userId = HttpContext.GetUserId();
 
@@ -85,15 +84,15 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin")]
         [HttpPut(ApiRoutes.Group.Update)]
-        public async Task<IActionResult> updateGroup([FromBody] GroupRequest createGroupRequest)
+        public async Task<IActionResult> updateGroup([FromBody] GroupUpdateRequest updatedGroup)
         {
             var userId = HttpContext.GetUserId();
 
-            var group = _mapper.Map<Group>(createGroupRequest);
+            var group = _mapper.Map<Group>(updatedGroup);
 
             var result = await _groupService.updateGroup(userId, group);
-
             if (result.Success)
+
             {
                 result.Data = _mapper.Map<GroupResponse>(result.Data);
                 return Ok(result);

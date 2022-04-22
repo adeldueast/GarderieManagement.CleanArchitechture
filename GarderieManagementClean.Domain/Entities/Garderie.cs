@@ -14,5 +14,6 @@ namespace GarderieManagementClean.Domain.Entities
 
         public List<Group> Groups { get; set; }
 
+        public List<ApplicationUser> ApplicationUsers { get; set; }
     }
 }

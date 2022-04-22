@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Contracts.Request
 {
-    public class GarderieRequest
+    public class GarderieCreateRequest
     {
         public string Name { get; set; }
          

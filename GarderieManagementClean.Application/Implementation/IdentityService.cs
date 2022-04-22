@@ -32,7 +32,7 @@ namespace GarderieManagementClean.Application.ServicesImplementation
             return result;
         }
 
-        public async Task<Result<Authentication>> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
+        public async Task<Result<Authentication>> RefreshTokenAsync(UserRefreshTokenRequest refreshTokenRequest)
         {
             var AuthResult = await _identityRepository.RefreshTokenAsync(refreshTokenRequest);
             return AuthResult;
@@ -56,7 +56,7 @@ namespace GarderieManagementClean.Application.ServicesImplementation
             return result;
         }
 
-        public async Task<Result<object>> CompleteRegistration( CompleteRegistrationRequest completeRegistrationRequest)
+        public async Task<Result<object>> CompleteRegistration( UserCompleteRegistrationRequest completeRegistrationRequest)
         {
             var result = await _identityRepository.CompleteRegistration(completeRegistrationRequest);
             return result;

@@ -5,10 +5,13 @@ using GarderieManagementClean.Application.Interfaces.Repositories;
 using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Application.ServicesImplementation;
+using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Identity;
 
 using GarderieManagementClean.Infrastructure.Persistence;
 using GarderieManagementClean.Infrastructure.Repositories;
+using GarderieManagementClean.Infrastructure.Repositories.EnfantRepository;
+using GarderieManagementClean.Infrastructure.Repositories.GroupRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -157,10 +160,19 @@ namespace GarderieManagementClean.API.Extensions
             services.AddScoped<IGarderieService, GarderieService>();
             services.AddScoped<IGarderieRepository, GarderieRepository>();
 
+
+            //group  service/repository
+            services.AddScoped<IGroupService, GroupService>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
+
+            //group  service/repository
+            services.AddScoped<IEnfantService, EnfantService>();
+            services.AddScoped<IEnfantRepository, EnfantRepository>();
+
             //email service
             services.AddTransient<IEmailService, EmailService>();
 
-            //TODO: Add Logger
+          
 
 
 

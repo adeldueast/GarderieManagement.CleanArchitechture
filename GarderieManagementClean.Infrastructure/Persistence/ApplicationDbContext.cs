@@ -19,13 +19,16 @@ namespace GarderieManagementClean.Infrastructure.Persistence
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
-
+        public DbSet<TutorEnfant> TutorEnfant { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-6.0#add-all-user-navigation-properties
+            
+            modelBuilder.Entity<TutorEnfant>()
+                .HasKey(te => new { te.EnfantId, te.UserId });
 
+            //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-6.0#add-all-user-navigation-properties
             modelBuilder.Entity<ApplicationUser>(b =>
             {
 

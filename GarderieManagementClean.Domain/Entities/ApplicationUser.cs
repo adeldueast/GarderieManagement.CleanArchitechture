@@ -1,9 +1,11 @@
-﻿using GarderieManagementClean.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-
-namespace GarderieManagementClean.Infrastructure.Identity
+namespace GarderieManagementClean.Domain.Entities
 {
     public class ApplicationUser : IdentityUser
     {
@@ -18,6 +20,8 @@ namespace GarderieManagementClean.Infrastructure.Identity
         public Garderie Garderie { get; set; }
 
         public List<RefreshToken> RefreshTokens { get; set; }
+
+        public List<Enfant> Enfants { get; set; }
 
         public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; }
         public virtual ICollection<IdentityUserLogin<string>> Logins { get; set; }

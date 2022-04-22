@@ -54,7 +54,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner")]
         [HttpPost(ApiRoutes.Garderie.Create)]
-        public async Task<IActionResult> CreateGarderie([FromBody] GarderieRequest garderieRequest)
+        public async Task<IActionResult> CreateGarderie([FromBody] GarderieCreateRequest garderieRequest)
         {
             var userId = HttpContext.GetUserId();
 
@@ -78,7 +78,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner")]
         [HttpPut(ApiRoutes.Garderie.Update)]
-        public async Task<IActionResult> UpdateGarderie([FromBody] GarderieRequest updatedGarderieRequest)
+        public async Task<IActionResult> UpdateGarderie([FromBody] GarderieCreateRequest updatedGarderieRequest)
         {
             //retrieve loggedin user Id
             var userId = HttpContext.GetUserId();

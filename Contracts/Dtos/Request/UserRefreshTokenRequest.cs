@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Contracts.Request
 {
-    public class RefreshTokenRequest
+    public class UserRefreshTokenRequest
     {
         public string AccessToken { get; set; }
 

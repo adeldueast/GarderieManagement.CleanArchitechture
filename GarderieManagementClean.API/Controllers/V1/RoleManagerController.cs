@@ -1,4 +1,5 @@
-﻿using GarderieManagementClean.Infrastructure.Identity;
+﻿using GarderieManagementClean.Domain.Entities;
+using GarderieManagementClean.Infrastructure.Identity;
 using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

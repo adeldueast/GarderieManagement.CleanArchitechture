@@ -4,6 +4,7 @@ using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Identity;
 using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -118,7 +119,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
 
 
 
-            var groups = _context.Groups.Where(g => g.GarderieId == user.GarderieId).ToList();
+            var groups = await  _context.Groups.Where(g => g.GarderieId == user.GarderieId).ToListAsync();
 
             return new Result<Group>
             {

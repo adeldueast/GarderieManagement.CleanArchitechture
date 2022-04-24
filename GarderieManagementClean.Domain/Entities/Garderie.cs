@@ -10,10 +10,10 @@ namespace GarderieManagementClean.Domain.Entities
 
         public string Name { get; set; }
 
-        public Address Address { get; set; }
+        public virtual Address Address { get; set; }
 
-        public List<Group> Groups { get; set; }
+        public virtual List<Group> Groups { get; set; }
 
-        public List<ApplicationUser> ApplicationUsers { get; set; }
+        public virtual List<ApplicationUser> ApplicationUsers { get; set; }
     }
 }

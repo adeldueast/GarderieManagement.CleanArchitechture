@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
-    public partial class InitMigration : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -252,11 +252,25 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     Nom = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateNaissance = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Photo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    GroupId = table.Column<int>(type: "int", nullable: true)
+                    GarderieId = table.Column<int>(type: "int", nullable: false),
+                    GroupId = table.Column<int>(type: "int", nullable: true),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Enfants", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Enfants_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Enfants_Garderies_GarderieId",
+                        column: x => x.GarderieId,
+                        principalTable: "Garderies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Enfants_Groups_GroupId",
                         column: x => x.GroupId,
@@ -266,43 +280,19 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApplicationUserEnfant",
-                columns: table => new
-                {
-                    EnfantsId = table.Column<int>(type: "int", nullable: false),
-                    TutorsId = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApplicationUserEnfant", x => new { x.EnfantsId, x.TutorsId });
-                    table.ForeignKey(
-                        name: "FK_ApplicationUserEnfant_AspNetUsers_TutorsId",
-                        column: x => x.TutorsId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ApplicationUserEnfant_Enfants_EnfantsId",
-                        column: x => x.EnfantsId,
-                        principalTable: "Enfants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TutorEnfant",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     EnfantId = table.Column<int>(type: "int", nullable: false),
                     Relation = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TutorEnfant", x => new { x.EnfantId, x.UserId });
+                    table.PrimaryKey("PK_TutorEnfant", x => new { x.EnfantId, x.ApplicationUserId });
                     table.ForeignKey(
-                        name: "FK_TutorEnfant_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_TutorEnfant_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -319,11 +309,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 table: "Addresses",
                 column: "GarderieId",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApplicationUserEnfant_TutorsId",
-                table: "ApplicationUserEnfant",
-                column: "TutorsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -370,6 +355,16 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Enfants_ApplicationUserId",
+                table: "Enfants",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Enfants_GarderieId",
+                table: "Enfants",
+                column: "GarderieId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Enfants_GroupId",
                 table: "Enfants",
                 column: "GroupId");
@@ -385,18 +380,15 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TutorEnfant_UserId",
+                name: "IX_TutorEnfant_ApplicationUserId",
                 table: "TutorEnfant",
-                column: "UserId");
+                column: "ApplicationUserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Addresses");
-
-            migrationBuilder.DropTable(
-                name: "ApplicationUserEnfant");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -423,10 +415,10 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Enfants");
 
             migrationBuilder.DropTable(
-                name: "Enfants");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Groups");

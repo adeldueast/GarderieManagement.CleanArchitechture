@@ -20,6 +20,6 @@
 
         public int GarderieId { get; set; }
 
-        public Garderie Garderie { get; set; }
+        public virtual Garderie Garderie { get; set; }
     }
 }

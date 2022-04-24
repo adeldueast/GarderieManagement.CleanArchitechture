@@ -12,6 +12,7 @@ using GarderieManagementClean.Infrastructure.Persistence;
 using GarderieManagementClean.Infrastructure.Repositories;
 using GarderieManagementClean.Infrastructure.Repositories.EnfantRepository;
 using GarderieManagementClean.Infrastructure.Repositories.GroupRepository;
+using GarderieManagementClean.Infrastructure.Repositories.UserRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -97,6 +98,7 @@ namespace GarderieManagementClean.API.Extensions
             // ApplicationDbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
+                options.UseLazyLoadingProxies();
                 options.UseSqlServer(config.GetConnectionString("DefaultConnection"));
             });
         }
@@ -125,7 +127,7 @@ namespace GarderieManagementClean.API.Extensions
             services.Configure<DataProtectionTokenProviderOptions>(options =>
             {
                 options.TokenLifespan = TimeSpan.FromHours(3);
-                
+
             });
 
 
@@ -165,14 +167,20 @@ namespace GarderieManagementClean.API.Extensions
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IGroupRepository, GroupRepository>();
 
-            //group  service/repository
+            //enfant  service/repository
             services.AddScoped<IEnfantService, EnfantService>();
             services.AddScoped<IEnfantRepository, EnfantRepository>();
+
+
+            //users  service/repository
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserRepository, UserRepository>();
+
 
             //email service
             services.AddTransient<IEmailService, EmailService>();
 
-          
+
 
 
 

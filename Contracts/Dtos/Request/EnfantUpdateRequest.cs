@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Contracts.Dtos.Request
 {
-    public class EnfantCreateRequest
+    public class EnfantUpdateRequest
     {
+        public int Id { get; set; }
         public string Nom { get; set; }
 
         public DateTime DateNaissance { get; set; }
@@ -17,6 +18,5 @@ namespace Contracts.Dtos.Request
         public int? GroupId { get; set; }
 
         public List<TutorRelationDTO> Tutors { get; set; }
-
     }
 }

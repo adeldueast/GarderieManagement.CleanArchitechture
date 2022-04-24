@@ -10,6 +10,7 @@ namespace GarderieManagementClean.Application.Models
     {
         public string AccessToken { get; set; }
 
+        public DateTime validTo { get; set; }
         public string RefreshToken { get; set; }
     }
 }

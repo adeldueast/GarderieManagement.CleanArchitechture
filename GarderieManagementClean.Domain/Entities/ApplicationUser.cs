@@ -17,11 +17,11 @@ namespace GarderieManagementClean.Domain.Entities
 
         public int? GarderieId { get; set; }
 
-        public Garderie Garderie { get; set; }
+        public virtual Garderie Garderie { get; set; }
 
-        public List<RefreshToken> RefreshTokens { get; set; }
+        public virtual List<RefreshToken> RefreshTokens { get; set; }
 
-        public List<Enfant> Enfants { get; set; }
+        public virtual List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
 
         public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; }
         public virtual ICollection<IdentityUserLogin<string>> Logins { get; set; }

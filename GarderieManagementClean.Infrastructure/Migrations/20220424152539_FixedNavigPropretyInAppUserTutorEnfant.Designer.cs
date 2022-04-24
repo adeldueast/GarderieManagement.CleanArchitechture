@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220419150155_InitMigration")]
-    partial class InitMigration
+    [Migration("20220424152539_FixedNavigPropretyInAppUserTutorEnfant")]
+    partial class FixedNavigPropretyInAppUserTutorEnfant
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,21 +20,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.15")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("ApplicationUserEnfant", b =>
-                {
-                    b.Property<int>("EnfantsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TutorsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("EnfantsId", "TutorsId");
-
-                    b.HasIndex("TutorsId");
-
-                    b.ToTable("ApplicationUserEnfant");
-                });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Address", b =>
                 {
@@ -158,6 +143,9 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Property<DateTime>("DateNaissance")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("GarderieId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
@@ -168,6 +156,8 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GarderieId");
 
                     b.HasIndex("GroupId");
 
@@ -248,15 +238,15 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Property<int>("EnfantId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Relation")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("EnfantId", "UserId");
+                    b.HasKey("EnfantId", "ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("TutorEnfant");
                 });
@@ -392,21 +382,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("ApplicationUserEnfant", b =>
-                {
-                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", null)
-                        .WithMany()
-                        .HasForeignKey("EnfantsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("TutorsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Address", b =>
                 {
                     b.HasOne("GarderieManagementClean.Domain.Entities.Garderie", "Garderie")
@@ -429,9 +404,17 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
                 {
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Garderie", "Garderie")
+                        .WithMany()
+                        .HasForeignKey("GarderieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GarderieManagementClean.Domain.Entities.Group", "Group")
                         .WithMany("Enfants")
                         .HasForeignKey("GroupId");
+
+                    b.Navigation("Garderie");
 
                     b.Navigation("Group");
                 });
@@ -458,21 +441,21 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.TutorEnfant", b =>
                 {
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany("Tutors")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
-                        .WithMany()
+                        .WithMany("Tutors")
                         .HasForeignKey("EnfantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "Tutor")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Enfant");
-
-                    b.Navigation("Tutor");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -536,7 +519,14 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
                     b.Navigation("Tokens");
 
+                    b.Navigation("Tutors");
+
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
+                {
+                    b.Navigation("Tutors");
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Garderie", b =>

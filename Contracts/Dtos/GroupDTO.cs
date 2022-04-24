@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace Contracts.Dtos
 {
-    public class TutorRelation
+    public class GroupDTO
     {
+        public int Id { get; set; }
 
-        public string TutorId { get; set; }
+        public string Name { get; set; }
 
-        public string Relation { get; set; }
+        public string Photo { get; set; }
+
+  
     }
 }

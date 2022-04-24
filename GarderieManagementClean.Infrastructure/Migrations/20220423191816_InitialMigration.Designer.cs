@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220420115332_ChangedTutorEnfant")]
-    partial class ChangedTutorEnfant
+    [Migration("20220423191816_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -146,6 +146,9 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Property<DateTime>("DateNaissance")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("GarderieId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
@@ -158,6 +161,8 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("GarderieId");
 
                     b.HasIndex("GroupId");
 
@@ -238,15 +243,15 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Property<int>("EnfantId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Relation")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("EnfantId", "UserId");
+                    b.HasKey("EnfantId", "ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("TutorEnfant");
                 });
@@ -408,9 +413,17 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .WithMany("Enfants")
                         .HasForeignKey("ApplicationUserId");
 
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Garderie", "Garderie")
+                        .WithMany()
+                        .HasForeignKey("GarderieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GarderieManagementClean.Domain.Entities.Group", "Group")
                         .WithMany("Enfants")
                         .HasForeignKey("GroupId");
+
+                    b.Navigation("Garderie");
 
                     b.Navigation("Group");
                 });
@@ -437,15 +450,15 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.TutorEnfant", b =>
                 {
-                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
-                        .WithMany("Tutors")
-                        .HasForeignKey("EnfantId")
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
+                        .WithMany("Tutors")
+                        .HasForeignKey("EnfantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

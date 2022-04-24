@@ -60,6 +60,40 @@
             public const string Update = Base + group + "Update";
 
             public const string Delete = Base + group + "Delete/{groupId:int}";
+
+        }
+
+        public static class Enfant
+        {
+            public const string enfant = "Enfant/";
+
+            public const string Get = Base + enfant + "Get/{enfantId:int}";
+
+            public const string GetAll = Base + enfant + "GetAll";
+
+            public const string Create = Base + enfant + "Create";
+
+            public const string Update = Base + enfant + "Update";
+
+            public const string Delete = Base + enfant + "Delete/{enfantId:int}";
+        }
+
+        public static class User
+        {
+            public const string user = "User/";
+
+            public const string GetAllEmployees = Base + user + "employees";
+
+            public const string GetAllTutors = Base + user + "tutors";
+
+
+            public const string GetAll = Base + user + "Get/";
+
+            public const string Create = Base + user + "Create";
+
+            public const string Update = Base + user + "Update";
+
+            public const string Delete = Base + user + "Delete/{groupId:int}";
         }
     }
 }

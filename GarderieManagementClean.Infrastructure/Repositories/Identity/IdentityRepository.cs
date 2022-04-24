@@ -30,7 +30,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
         private readonly IEmailService _emailService;
 
         public IdentityRepository(
-            IEmailService emailService,
+                IEmailService emailService,
              UserManager<ApplicationUser> userManager,
              RoleManager<IdentityRole> roleManager,
              JwtSettings jwtSettings,
@@ -91,9 +91,10 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Success = true,
                 Data = new
                 {
-                    Message = "Registrated successfuly, please confirm your email.",
-                    UserId = newUser.Id,
-                    ConfirmEmailToken = EmailConfirmationToken
+                    Message = "Registrated successfuly"
+                    //Message = "Registrated successfuly, please confirm your email.",
+                    //UserId = newUser.Id,
+                    //ConfirmEmailToken = EmailConfirmationToken
                 }
             };
 
@@ -151,6 +152,8 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
             var newUser = new ApplicationUser
             {
+                FirstName = inviteUserRequest.FirstName,
+                LastName = inviteUserRequest.LastName,
                 Email = inviteUserRequest.Email,
                 UserName = inviteUserRequest.Email,
                 GarderieId = currentUser.GarderieId,
@@ -180,9 +183,10 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Success = true,
                 Data = new
                 {
-                    Message = "Invitation successful, user needs to accept the invite.",
-                    UserId = newUser.Id,
-                    ConfirmEmailToken = EmailConfirmationToken
+                    Message = $"User {inviteUserRequest.Email} invited successfully ",
+                    //Message = "Invitation successful, user needs to accept the invite.",
+                    //UserId = newUser.Id,
+                    //ConfirmEmailToken = EmailConfirmationToken
                 }
             };
 
@@ -510,6 +514,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Data = new Authentication
                 {
                     AccessToken = jwtTokenHandler.WriteToken(token),
+                    validTo = token.ValidTo,
                     RefreshToken = refreshToken.Token
                 }
             };

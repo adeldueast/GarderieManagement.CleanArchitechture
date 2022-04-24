@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
@@ -35,12 +36,12 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             var result = await _groupService.getGroupById(userId, groupId);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                result.Data = _mapper.Map<GroupResponse>(result.Data);
-                return Ok(result);
+                return BadRequest(result);
             }
-            return BadRequest(result);
+            result.Data = _mapper.Map<GroupResponse>(result.Data);
+            return Ok(result);
         }
 
 
@@ -51,13 +52,13 @@ namespace GarderieManagementClean.API.Controllers.V1
             var userId = HttpContext.GetUserId();
 
             var result = await _groupService.getAllGroups(userId);
-         
-            if (result.Success)
+
+            if (!result.Success)
             {
-                result.Data = _mapper.Map<GroupResponse>(result.Data);
-                return Ok(result);
+                return BadRequest(result);
             }
-            return BadRequest(result);
+            result.Data = _mapper.Map<List<GroupResponse>>(result.Data);
+            return Ok(result);
         }
 
 
@@ -71,14 +72,14 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             var result = await _groupService.createGroup(userId, group);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                result.Data = _mapper.Map<GroupResponse>(result.Data);
-                return Ok(result);
+                return BadRequest(result);
             }
 
+            result.Data = _mapper.Map<GroupResponse>(result.Data);
+            return Ok(result);
 
-            return BadRequest(result);
         }
 
 
@@ -86,20 +87,20 @@ namespace GarderieManagementClean.API.Controllers.V1
         [HttpPut(ApiRoutes.Group.Update)]
         public async Task<IActionResult> updateGroup([FromBody] GroupUpdateRequest updatedGroup)
         {
+
             var userId = HttpContext.GetUserId();
 
             var group = _mapper.Map<Group>(updatedGroup);
 
             var result = await _groupService.updateGroup(userId, group);
-            if (result.Success)
+            if (!result.Success)
 
             {
-                result.Data = _mapper.Map<GroupResponse>(result.Data);
-                return Ok(result);
+                return BadRequest(result);
             }
 
-
-            return BadRequest(result);
+            result.Data = _mapper.Map<GroupResponse>(result.Data);
+            return Ok(result);
         }
 
 
@@ -111,14 +112,14 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             var result = await _groupService.deleteGroup(userId, groupId);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                result.Data = _mapper.Map<GroupResponse>(result.Data);
-                return Ok(result);
+                return BadRequest(result);
+
             }
+            return Ok(result);
 
 
-            return BadRequest(result);
         }
 
     }

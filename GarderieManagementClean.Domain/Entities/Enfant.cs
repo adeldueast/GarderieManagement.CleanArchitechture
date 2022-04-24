@@ -10,18 +10,20 @@ namespace GarderieManagementClean.Domain.Entities
     { 
 
         public int Id { get; set; }
-
         public string Nom { get; set; }
-
         public DateTime DateNaissance { get; set; }
-
         public string Photo { get; set; } = "www.photo-url.com";
 
+
+        public int GarderieId { get; set; }
+        public virtual Garderie Garderie { get; set; }
+
+
         public int? GroupId { get; set; }
+        public virtual Group Group { get; set; }
 
-        public Group Group { get; set; }
 
-        public List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
+        public virtual List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
 
 
     }

@@ -35,7 +35,7 @@ namespace GarderieManagementClean.Application.Implementation
             return _enfantRepository.createEnfant(userId, newEnfant);
         }
 
-        public Task<Result<Enfant>> updateEnfant(string userId, Enfant updatedEnfant)
+        public Task<Result<Enfant>> updateEnfant(string userId, EnfantUpdateRequest updatedEnfant)
         {
             return _enfantRepository.updateEnfant(userId, updatedEnfant);
         }

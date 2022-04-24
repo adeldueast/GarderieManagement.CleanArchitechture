@@ -118,8 +118,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
             }
 
 
-
-            var groups = await  _context.Groups.Where(g => g.GarderieId == user.GarderieId).ToListAsync();
+            var groups = await _context.Groups.Where(g => g.GarderieId == user.GarderieId).ToListAsync();
 
             return new Result<Group>
             {
@@ -190,6 +189,12 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
                     Errors = new List<string>() { $"Couldnt update group '{updatedGroup.Id}' because it doesnt exist" }
                 };
             }
+
+
+            group.Name = updatedGroup.Name;
+            group.Photo = updatedGroup.Photo;
+
+            await _context.SaveChangesAsync();
 
             return new Result<Group>
             {

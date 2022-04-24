@@ -138,11 +138,11 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("DateNaissance")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("GarderieId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
@@ -155,7 +155,7 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("GarderieId");
 
                     b.HasIndex("GroupId");
 
@@ -236,15 +236,15 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Property<int>("EnfantId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Relation")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("EnfantId", "UserId");
+                    b.HasKey("EnfantId", "ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("TutorEnfant");
                 });
@@ -402,13 +402,17 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
                 {
-                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", null)
-                        .WithMany("Enfants")
-                        .HasForeignKey("ApplicationUserId");
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Garderie", "Garderie")
+                        .WithMany()
+                        .HasForeignKey("GarderieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("GarderieManagementClean.Domain.Entities.Group", "Group")
                         .WithMany("Enfants")
                         .HasForeignKey("GroupId");
+
+                    b.Navigation("Garderie");
 
                     b.Navigation("Group");
                 });
@@ -435,15 +439,15 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.TutorEnfant", b =>
                 {
-                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
+                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "ApplicationUser")
                         .WithMany("Tutors")
-                        .HasForeignKey("EnfantId")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GarderieManagementClean.Domain.Entities.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
+                        .WithMany("Tutors")
+                        .HasForeignKey("EnfantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -507,13 +511,13 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 {
                     b.Navigation("Claims");
 
-                    b.Navigation("Enfants");
-
                     b.Navigation("Logins");
 
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Tokens");
+
+                    b.Navigation("Tutors");
 
                     b.Navigation("UserRoles");
                 });

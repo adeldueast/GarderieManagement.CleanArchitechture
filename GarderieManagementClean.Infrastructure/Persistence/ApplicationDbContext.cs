@@ -26,7 +26,7 @@ namespace GarderieManagementClean.Infrastructure.Persistence
 
             
             modelBuilder.Entity<TutorEnfant>()
-                .HasKey(te => new { te.EnfantId, te.UserId });
+                .HasKey(te => new { te.EnfantId, te.ApplicationUserId });
 
             //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-6.0#add-all-user-navigation-properties
             modelBuilder.Entity<ApplicationUser>(b =>

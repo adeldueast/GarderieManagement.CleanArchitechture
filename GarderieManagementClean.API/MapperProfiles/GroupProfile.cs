@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Contracts.Dtos;
 using Contracts.Dtos.Request;
 using Contracts.Dtos.Response;
 using Contracts.Request;
@@ -15,7 +16,9 @@ namespace GarderieManagementClean.API.MapperProfiles
 
             CreateMap<GroupCreateRequest, Group>().ReverseMap();
 
+            CreateMap<GroupDTO, Group>().ReverseMap();
 
+            CreateMap<GroupUpdateRequest, Group>().ReverseMap();
 
             CreateMap<GroupResponse, Group>();
             CreateMap<Group, GroupResponse>();

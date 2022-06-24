@@ -81,7 +81,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
 
             //TODO: Send email confirmation to user
-            var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            // var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
             // EmailConfirmationToken = WebUtility.UrlEncode(EmailConfirmationToken);
             // await _emailService.SendEmailAsync(newUser.Email, "Email confirmation", EmailConfirmationToken, newUser.Id);
 
@@ -174,7 +174,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
             await _userManager.AddToRoleAsync(newUser, inviteUserRequest.Role);
 
             //TODO: Send invite confirmation to user
-            var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+            // var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
             // EmailConfirmationToken = WebUtility.UrlEncode(EmailConfirmationToken);
             // await _emailService.SendEmailAsync(newUser.Email, "Email confirmation", EmailConfirmationToken, newUser.Id);
 
@@ -505,7 +505,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 CreatedDate = DateTime.UtcNow,
                 ExpiryDate = DateTime.UtcNow.AddMonths(6),
             };
-            await _context.RefreshTokens.AddAsync(refreshToken);
+             _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync();
 
             return new Result<Authentication>()

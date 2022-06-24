@@ -105,7 +105,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 GarderieId = (int)user.GarderieId
             };
 
-            await _context.Enfants.AddAsync(enfant);
+             _context.Enfants.Add(enfant);
             foreach (var tutorPair in tutors)
             {
                 var TutorEnfant = new TutorEnfant

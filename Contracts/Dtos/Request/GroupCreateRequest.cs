@@ -15,6 +15,8 @@ namespace Contracts.Dtos.Request
         public string Photo { get; set; }
 
 
+        public string EducatriceId { get; set; }
+
 
     }
 }

@@ -95,5 +95,22 @@
 
             public const string Delete = Base + user + "Delete/{groupId:int}";
         }
+
+        public static class Journal
+        {
+            public const string journal = "Journal/";
+
+
+
+            public const string GetAll = Base + journal + "Get/";
+
+            public const string Create = Base + journal + "Create";
+
+            public const string Update = Base + journal + "Update";
+
+            public const string Delete = Base + journal + "Delete/{journalId:int}";
+        }
+
+
     }
 }

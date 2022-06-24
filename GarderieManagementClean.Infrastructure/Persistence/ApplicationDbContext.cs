@@ -16,6 +16,14 @@ namespace GarderieManagementClean.Infrastructure.Persistence
         public DbSet<Group> Groups { get; set; }
         public DbSet<Enfant> Enfants { get; set; }
 
+        public DbSet<Local> Locals { get; set; }
+
+
+        public DbSet<JournalDeBord> JournalDeBords { get; set; }
+
+        public DbSet<Attendance> Attendances { get; set; }
+
+
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 

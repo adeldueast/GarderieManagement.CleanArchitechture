@@ -45,7 +45,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories
                 };
             }
 
-            var garderie = await _context.Garderies.Include("Address").FirstOrDefaultAsync(g => g.Id == user.GarderieId);
+            var garderie = await _context.Garderies.FirstOrDefaultAsync(g => g.Id == user.GarderieId);
             _context.Entry(garderie).State = EntityState.Detached;
             if (garderie == null)
             {
@@ -88,7 +88,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories
                 Address = newGarderie.Address,
             };
 
-            await _context.Garderies.AddAsync(newGarderie);
+             _context.Garderies.Add(newGarderie);
             user.Garderie = newGarderie;
             await _context.SaveChangesAsync();
 
@@ -120,7 +120,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories
                 };
             }
 
-            var garderieToUpdate = await _context.Garderies.Include("Address").FirstOrDefaultAsync(g => g.Id == user.GarderieId);
+            var garderieToUpdate = await _context.Garderies.FirstOrDefaultAsync(g => g.Id == user.GarderieId);
             if (garderieToUpdate == null)
             {
                 return null;
@@ -168,13 +168,13 @@ namespace GarderieManagementClean.Infrastructure.Repositories
                 };
             }
 
-            var users = _context.Users.Where(x => x.GarderieId == user.GarderieId).Include("Garderie");
+            var users = _context.Users.Where(x => x.GarderieId == user.GarderieId);
             foreach (var u in users)
             {
                 u.Garderie = null;
             }
 
-            var garderie = await _context.Garderies.Include("Address").SingleOrDefaultAsync(g => g.Id == user.GarderieId);
+            var garderie = await _context.Garderies.SingleOrDefaultAsync(g => g.Id == user.GarderieId);
             _context.Remove(garderie);
             await _context.SaveChangesAsync();
 

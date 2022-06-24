@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    [Route("api/[controller]")]
+    
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -24,7 +24,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize()]
         [HttpGet(ApiRoutes.User.GetAllEmployees)]
         public async Task<IActionResult> getAllEmlpoyees()
         {
@@ -47,7 +47,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize()]
         [HttpGet(ApiRoutes.User.GetAllTutors)]
         public async Task<IActionResult> getAllTutors()
         {

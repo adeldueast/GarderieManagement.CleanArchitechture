@@ -29,7 +29,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize]
         [HttpGet(ApiRoutes.Garderie.Get)]
         public async Task<IActionResult> GetGarderieInfo()
         {
@@ -52,7 +52,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner")]
+        [Authorize(Roles = "owner")]
         [HttpPost(ApiRoutes.Garderie.Create)]
         public async Task<IActionResult> CreateGarderie([FromBody] GarderieCreateRequest garderieRequest)
         {
@@ -76,7 +76,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner")]
+        [Authorize( Roles = "owner")]
         [HttpPut(ApiRoutes.Garderie.Update)]
         public async Task<IActionResult> UpdateGarderie([FromBody] GarderieCreateRequest updatedGarderieRequest)
         {
@@ -102,7 +102,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner")]
+        [Authorize( Roles = "owner")]
         [HttpPost(ApiRoutes.Garderie.Delete)]
         public async Task<IActionResult> DeleteGarderie()
         {

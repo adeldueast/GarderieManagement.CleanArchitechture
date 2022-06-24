@@ -15,8 +15,7 @@ using System.Threading.Tasks;
 namespace GarderieManagementClean.API.Controllers.V1
 {
 
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin,employee")]
-    //[Route("api/[controller]")]
+    [Authorize(Roles ="owner,admin,employee")]
     [ApiController]
     public class EnfantController : ControllerBase
     {
@@ -29,6 +28,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
+        [Authorize(Roles = "owner,admin")]
         [HttpPost(ApiRoutes.Enfant.Create)]
         public async Task<IActionResult> createEnfant([FromBody] EnfantCreateRequest enfantCreateRequest)
         {
@@ -43,7 +43,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 {
                     return BadRequest(result);
                 }
-              
+
                 result.Data = _mapper.Map<EnfantResponse>(result.Data);
 
                 return CreatedAtAction(nameof(getEnfantById), new { enfantId = (result.Data as EnfantResponse).Id }, result);
@@ -105,7 +105,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
         }
 
-
+        [Authorize(Roles ="owner,admin")]
         [HttpPost(ApiRoutes.Enfant.Update)]
         public async Task<IActionResult> updateEnfant([FromBody] EnfantUpdateRequest enfantUpdateRequest)
         {
@@ -128,6 +128,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
+        [Authorize(Roles = "owner,admin")]
         [HttpGet(ApiRoutes.Enfant.Delete)]
         public async Task<IActionResult> deleteEnfant(int enfantId)
         {

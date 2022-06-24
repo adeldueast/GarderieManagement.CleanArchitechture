@@ -4,14 +4,16 @@ using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220621180628_AddedUpdatedByUpdatedAtJournalModel")]
+    partial class AddedUpdatedByUpdatedAtJournalModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,35 +133,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Attendance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("AbsenceDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ArrivedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EnfantId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("LeftAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EnfantId");
-
-                    b.ToTable("Attendances");
-                });
-
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
                 {
                     b.Property<int>("Id")
@@ -176,9 +149,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("LocalId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nom")
                         .HasColumnType("nvarchar(max)");
 
@@ -190,8 +160,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.HasIndex("GarderieId");
 
                     b.HasIndex("GroupId");
-
-                    b.HasIndex("LocalId");
 
                     b.ToTable("Enfants");
                 });
@@ -291,24 +259,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.HasIndex("EnfantId");
 
                     b.ToTable("JournalDeBords");
-                });
-
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Local", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId")
-                        .IsUnique();
-
-                    b.ToTable("Locals");
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.RefreshToken", b =>
@@ -511,17 +461,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Navigation("Garderie");
                 });
 
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Attendance", b =>
-                {
-                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
-                        .WithMany()
-                        .HasForeignKey("EnfantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Enfant");
-                });
-
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
                 {
                     b.HasOne("GarderieManagementClean.Domain.Entities.Garderie", "Garderie")
@@ -534,15 +473,9 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .WithMany("Enfants")
                         .HasForeignKey("GroupId");
 
-                    b.HasOne("GarderieManagementClean.Domain.Entities.Local", "Local")
-                        .WithMany("Enfants")
-                        .HasForeignKey("LocalId");
-
                     b.Navigation("Garderie");
 
                     b.Navigation("Group");
-
-                    b.Navigation("Local");
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Group", b =>
@@ -577,17 +510,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Navigation("ApplicationUser");
 
                     b.Navigation("Enfant");
-                });
-
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Local", b =>
-                {
-                    b.HasOne("GarderieManagementClean.Domain.Entities.Group", "Group")
-                        .WithOne("Local")
-                        .HasForeignKey("GarderieManagementClean.Domain.Entities.Local", "GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.RefreshToken", b =>
@@ -701,13 +623,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Group", b =>
-                {
-                    b.Navigation("Enfants");
-
-                    b.Navigation("Local");
-                });
-
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Local", b =>
                 {
                     b.Navigation("Enfants");
                 });

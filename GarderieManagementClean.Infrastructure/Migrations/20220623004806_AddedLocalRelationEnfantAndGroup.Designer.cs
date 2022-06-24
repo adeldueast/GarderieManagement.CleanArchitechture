@@ -4,14 +4,16 @@ using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220623004806_AddedLocalRelationEnfantAndGroup")]
+    partial class AddedLocalRelationEnfantAndGroup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,35 +131,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
-                });
-
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Attendance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("AbsenceDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ArrivedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EnfantId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("LeftAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EnfantId");
-
-                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>
@@ -308,7 +281,7 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.HasIndex("GroupId")
                         .IsUnique();
 
-                    b.ToTable("Locals");
+                    b.ToTable("Local");
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.RefreshToken", b =>
@@ -509,17 +482,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .HasForeignKey("GarderieId");
 
                     b.Navigation("Garderie");
-                });
-
-            modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Attendance", b =>
-                {
-                    b.HasOne("GarderieManagementClean.Domain.Entities.Enfant", "Enfant")
-                        .WithMany()
-                        .HasForeignKey("EnfantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Enfant");
                 });
 
             modelBuilder.Entity("GarderieManagementClean.Domain.Entities.Enfant", b =>

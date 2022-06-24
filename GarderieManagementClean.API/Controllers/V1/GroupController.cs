@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    //[Route("api/[controller]")]
+    
     [ApiController]
     public class GroupController : ControllerBase
     {
@@ -28,7 +28,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             _mapper = mapper;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,employee,admin")]
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpGet(ApiRoutes.Group.Get)]
         public async Task<IActionResult> getGroupById(int groupId)
         {
@@ -45,7 +45,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,employee,admin")]
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpGet(ApiRoutes.Group.GetAll)]
         public async Task<IActionResult> getAllGroups()
         {
@@ -62,7 +62,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin")]
+        [Authorize(Roles = "owner,admin")]
         [HttpPost(ApiRoutes.Group.Create)]
         public async Task<IActionResult> createGroup([FromBody] GroupCreateRequest createGroupRequest)
         {
@@ -83,7 +83,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin")]
+        [Authorize(Roles = "owner,admin")]
         [HttpPut(ApiRoutes.Group.Update)]
         public async Task<IActionResult> updateGroup([FromBody] GroupUpdateRequest updatedGroup)
         {
@@ -104,7 +104,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin")]
+        [Authorize(Roles = "owner,admin")]
         [HttpDelete(ApiRoutes.Group.Delete)]
         public async Task<IActionResult> deleteGroup(int groupId)
         {

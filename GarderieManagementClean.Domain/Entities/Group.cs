@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,15 @@ namespace GarderieManagementClean.Domain.Entities
         public virtual List<Enfant>  Enfants { get; set; }
 
         public int GarderieId { get; set; }
-
         public virtual Garderie Garderie { get; set; }
+
+
+        public virtual Local Local { get; set; }
+
+        //this is the one to one relation with ApplicationUser
+
+        [ForeignKey("ApplicationUser")]
+        public string EducatriceId { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
     }
 }

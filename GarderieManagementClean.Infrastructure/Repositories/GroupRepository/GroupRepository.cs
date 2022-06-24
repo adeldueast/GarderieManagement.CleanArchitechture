@@ -26,13 +26,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
         public async Task<Result<Group>> createGroup(string userId, Group newGroup)
         {
             var user = await getUserById(userId);
-            if (user == null)
-            {
-                return new Result<Group>
-                {
-                    Errors = new List<string>() { $"Couldnt create group because user '{userId}' was not found" }
-                };
-            }
+
 
             if (user.GarderieId == null)
             {
@@ -42,10 +36,58 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
                 };
             }
 
+            //TODO: TEST THIS
+            //Check if educatrice exist
+            var educatrice = await _userManager.FindByIdAsync(newGroup.EducatriceId);
+
+
+            if (educatrice == null || educatrice.GarderieId != user.GarderieId)
+            {
+                return new Result<Group>
+                {
+                    Errors = new List<string>() { $"Couldnt create group because user '{userId}' was not found" }
+                };
+            }
+
+
+            //this is not null, but the column GroupId is NULL 
+            var group = educatrice.Group;
+
+
+
+
+
+            //Check if educatrice already has a group
+            if (educatrice.Group != null)
+            {
+                return new Result<Group>
+                {
+                    Errors = new List<string>() { $"Couldnt create group because user '{userId}' already has a group" }
+                };
+            }
+
+
+            //Check if educatrice is in role emplyee
+            if (!await _userManager.IsInRoleAsync(educatrice, "employee"))
+            {
+                return new Result<Group>
+                {
+                    Errors = new List<string>() { $"Couldnt create group because user '{userId}' is not an employee" }
+                };
+            }
+
 
             newGroup.GarderieId = (int)user.GarderieId;
+            newGroup.ApplicationUser = educatrice;
+            newGroup.Local = new Local();
 
-            await _context.AddAsync(newGroup);
+            _context.Add(newGroup);
+
+            await _context.SaveChangesAsync();
+
+
+
+
             await _context.SaveChangesAsync();
 
             return new Result<Group>
@@ -101,13 +143,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
         {
             var user = await getUserById(userId);
 
-            if (user == null)
-            {
-                return new Result<Group>
-                {
-                    Errors = new List<string>() { $"Couldnt get groups because user '{userId}' was not found" }
-                };
-            }
+
 
             if (user.GarderieId == null)
             {
@@ -130,13 +166,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
         public async Task<Result<Group>> getGroupById(string userId, int GroupId)
         {
             var user = await getUserById(userId);
-            if (user == null)
-            {
-                return new Result<Group>
-                {
-                    Errors = new List<string>() { $"Couldnt get group because user '{userId}' was not found" }
-                };
-            }
+
             if (user.GarderieId == null)
             {
                 return new Result<Group>
@@ -165,13 +195,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
         public async Task<Result<Group>> updateGroup(string userId, Group updatedGroup)
         {
             var user = await getUserById(userId);
-            if (user == null)
-            {
-                return new Result<Group>
-                {
-                    Errors = new List<string>() { $"Couldnt update groups because user '{userId}' was not found" }
-                };
-            }
+
             if (user.GarderieId == null)
             {
                 return new Result<Group>
@@ -193,6 +217,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
 
             group.Name = updatedGroup.Name;
             group.Photo = updatedGroup.Photo;
+            group.EducatriceId = updatedGroup.EducatriceId;
 
             await _context.SaveChangesAsync();
 

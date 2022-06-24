@@ -19,6 +19,10 @@ namespace GarderieManagementClean.Domain.Entities
 
         public virtual Garderie Garderie { get; set; }
 
+     
+
+        public virtual Group Group { get; set; }
+
         public virtual List<RefreshToken> RefreshTokens { get; set; }
 
         public virtual List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();

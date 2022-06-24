@@ -14,6 +14,9 @@ namespace GarderieManagementClean.API.MapperProfiles
 
             CreateMap<Enfant, EnfantDetailResponse>().ReverseMap();
 
+            CreateMap<Enfant, EnfantSummariesResponse>().ReverseMap();
+
+
 
         }
     }

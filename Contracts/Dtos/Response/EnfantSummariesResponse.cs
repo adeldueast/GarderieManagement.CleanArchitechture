@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 
 namespace Contracts.Dtos.Response
 {
-    public class GroupResponse
+    public class EnfantSummariesResponse
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }
-
-        public string Photo { get; set; }
-
-        public string EducatriceId { get; set; }
-
+        public string Nom { get; set; }
     }
 }

@@ -14,9 +14,12 @@ namespace Contracts.Dtos
 
         public string LastName { get; set; }
 
-        public string Photo { get; set; }
+        //public string Photo { get; set; }
+
 
         public string Email { get; set; }
+
+        //TODO: Add Phone and Address and isAuthorize to pickup the child and shouldContact in emergency case 
 
     }
 }

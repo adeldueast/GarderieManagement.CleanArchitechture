@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 namespace GarderieManagementClean.API.Controllers.V1
 {
     // [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class AuthManagerController : ControllerBase
     {
@@ -27,6 +28,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
+        [AllowAnonymous]
         [HttpPost(ApiRoutes.Identity.Register)]
         public async Task<IActionResult> RegisterAsync([FromBody] UserRegistrationRequest request)
         {
@@ -55,7 +57,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
         }
 
-
+        [AllowAnonymous]
         [HttpPost(ApiRoutes.Identity.Login)]
         public async Task<IActionResult> AuthenticateAsync([FromBody] UserLoginRequest request)
         {
@@ -88,6 +90,115 @@ namespace GarderieManagementClean.API.Controllers.V1
                 return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
 
             }
+
+        }
+
+
+
+    
+        [HttpPost(ApiRoutes.Identity.InviteUser)]
+        public async Task<IActionResult> InviteUser([FromBody] UserInviteUserRequest inviteUserRequest)
+        {
+            try
+            {
+
+                var userId = HttpContext.GetUserId();
+                var result = await _identityService.InviteUser(userId, inviteUserRequest);
+
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
+            }
+        }
+
+
+       
+        [HttpPost(ApiRoutes.Identity.InviteTutor)]
+        
+        public async Task<IActionResult> InviteTutor([FromBody] UserInviteTutorRequest inviteTutorRequest)
+        {
+            try
+            {
+
+                var userId = HttpContext.GetUserId();
+                var result = await _identityService.InviteTutor(userId, inviteTutorRequest);
+
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
+            }
+        }
+
+
+        #region REFRESH TOKENS AND CONFIRM EMAIL
+        //REFRESH TOKEN
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost(ApiRoutes.Identity.RefreshToken)]
+        public async Task<IActionResult> RefreshTokenAsync([FromBody] UserRefreshTokenRequest tokenRequest)
+        {
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(x => x.Errors.Select(err => err.ErrorMessage));
+                    // _logger.LogInfo($"Failed to refreshToken, {errors} ");
+                    return BadRequest(new ErrorResponse(errors));
+
+
+                }
+                var authResult = await _identityService.RefreshTokenAsync(tokenRequest);
+
+                if (!authResult.Success)
+                {
+                    return BadRequest(authResult);
+                }
+
+                return Ok(authResult);
+            }
+            catch (Exception e)
+            {
+
+
+                //  _logger.LogError($"RefreshTokenAsync : {e.Message}, {e.InnerException.Message}");
+                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
+
+            }
+
+        }
+
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpDelete(ApiRoutes.Identity.RevokeTokens)]
+        public async Task<IActionResult> RevokeAllTokens()
+        {
+            var userId = HttpContext.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest(new { Errors = new[] { $"User with id '{userId}' not found" } });
+            }
+            var deletedTokens = await _identityService.RevokeTokensAsync(userId);
+
+            return Ok(deletedTokens);
 
         }
 
@@ -146,86 +257,6 @@ namespace GarderieManagementClean.API.Controllers.V1
                 return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
             }
         }
-
-
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost(ApiRoutes.Identity.InviteUser)]
-        public async Task<IActionResult> InviteUser([FromBody] UserInviteUserRequest inviteUserRequest)
-        {
-            try
-            {
-
-                var userId = HttpContext.GetUserId();
-                var result = await _identityService.InviteUser(userId, inviteUserRequest);
-
-
-                if (!result.Success)
-                {
-                    return BadRequest(result);
-                }
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-
-                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
-            }
-        }
-
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost(ApiRoutes.Identity.RefreshToken)]
-        public async Task<IActionResult> RefreshTokenAsync([FromBody] UserRefreshTokenRequest tokenRequest)
-        {
-
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values.SelectMany(x => x.Errors.Select(err => err.ErrorMessage));
-                    // _logger.LogInfo($"Failed to refreshToken, {errors} ");
-                    return BadRequest(new ErrorResponse(errors));
-
-
-                }
-                var authResult = await _identityService.RefreshTokenAsync(tokenRequest);
-
-                if (!authResult.Success)
-                {
-                    return BadRequest(authResult);
-                }
-
-                return Ok(authResult);
-            }
-            catch (Exception e)
-            {
-
-
-                //  _logger.LogError($"RefreshTokenAsync : {e.Message}, {e.InnerException.Message}");
-                return StatusCode(500, new Result<object>() { Errors = new string[] { $"{e.Message}" } });
-
-            }
-
-        }
-
-
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpDelete(ApiRoutes.Identity.RevokeTokens)]
-        public async Task<IActionResult> RevokeAllTokens()
-        {
-            var userId = HttpContext.GetUserId();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest(new { Errors = new[] { $"User with id '{userId}' not found" } });
-            }
-            var deletedTokens = await _identityService.RevokeTokensAsync(userId);
-
-            return Ok(deletedTokens);
-
-        }
-
+        #endregion
     }
 }

@@ -42,80 +42,78 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     Errors = new List<string>() { "User doesnt have a garderie" }
                 };
             }
-            if (!newEnfant.Tutors.Any())
-            {
-                return new Result<Enfant>
-                {
-                    Errors = new List<string>() { $"At least one tutor required" }
-                };
-            }
+            //if (!newEnfant.Tutors.Any())
+            //{
+            //    return new Result<Enfant>
+            //    {
+            //        Errors = new List<string>() { $"At least one tutor required" }
+            //    };
+            //}
 
-            Group group = null;
-            List<(ApplicationUser, string)> tutors = new List<(ApplicationUser, string)>();
+            // Group group = null;
+            //List<(ApplicationUser, string)> tutors = new List<(ApplicationUser, string)>();
 
 
-            //check if group exist
-            if (newEnfant.GroupId != null && newEnfant.GroupId != 0)
-            {
-                group = await _context.Groups.SingleOrDefaultAsync(x => x.GarderieId == user.GarderieId && x.Id == newEnfant.GroupId);
-                if (group == null)
-                {
-                    return new Result<Enfant>
-                    {
-                        Errors = new List<string>() { $"Group '{newEnfant.GroupId}' doesnt exist" }
-                    };
-                }
-            }
+            ////check if group exist
+            //if (newEnfant.GroupId != null && newEnfant.GroupId != 0)
+            //{
+            //    group = await _context.Groups.SingleOrDefaultAsync(x => x.GarderieId == user.GarderieId && x.Id == newEnfant.GroupId);
+            //    if (group == null)
+            //    {
+            //        return new Result<Enfant>
+            //        {
+            //            Errors = new List<string>() { $"Group '{newEnfant.GroupId}' doesnt exist" }
+            //        };
+            //    }
+            //}
             //Checks for duplicate userId in the request
-            var Temp = Guid.NewGuid().ToString();
-            foreach (var tutorPair in newEnfant.Tutors)
-            {
-                var tutorId = tutorPair.TutorEmail;
-                if (tutorId == Temp)
-                {
-                    return new Result<Enfant>
-                    {
-                        Errors = new List<string>() { $"Duplicate user '{tutorId}'" }
-                    };
-                }
-                Temp = tutorId;
-            }
+            //var Temp = Guid.NewGuid().ToString();
+            //foreach (var tutorPair in newEnfant.Tutors)
+            //{
+            //    var tutorId = tutorPair.TutorEmail;
+            //    if (tutorId == Temp)
+            //    {
+            //        return new Result<Enfant>
+            //        {
+            //            Errors = new List<string>() { $"Duplicate user '{tutorId}'" }
+            //        };
+            //    }
+            //    Temp = tutorId;
+            //}
 
-            //Check if usersIds are valid 
-            foreach (var tutorPair in newEnfant.Tutors)
-            {
-                //var tutorDb = await _context.Users.SingleOrDefaultAsync(x => x.Id == tutorPair.TutorEmail);
-                var tutorDb = await _userManager.FindByEmailAsync(tutorPair.TutorEmail);
-                if (tutorDb == null || !await _userManager.IsInRoleAsync(tutorDb, "tutor"))
-                {
-                    return new Result<Enfant>
-                    {
-                        Errors = new List<string>() { $"Tutor '{tutorPair.TutorEmail}' doesnt exist or is not a tutor" }
-                    };
-                }
-                tutors.Add(new(tutorDb, tutorPair.Relation));
-            }
+            ////Check if usersIds are valid 
+            //foreach (var tutorPair in newEnfant.Tutors)
+            //{
+            //    //var tutorDb = await _context.Users.SingleOrDefaultAsync(x => x.Id == tutorPair.TutorEmail);
+            //    var tutorDb = await _userManager.FindByEmailAsync(tutorPair.TutorEmail);
+            //    if (tutorDb == null || !await _userManager.IsInRoleAsync(tutorDb, "tutor"))
+            //    {
+            //        return new Result<Enfant>
+            //        {
+            //            Errors = new List<string>() { $"Tutor '{tutorPair.TutorEmail}' doesnt exist or is not a tutor" }
+            //        };
+            //    }
+            //    tutors.Add(new(tutorDb, tutorPair.Relation));
+            //}
 
             var enfant = new Enfant()
             {
                 Nom = newEnfant.Nom,
                 DateNaissance = newEnfant.DateNaissance,
-                Photo = newEnfant.Photo,
-                Group = group,
                 GarderieId = (int)user.GarderieId
             };
 
-             _context.Enfants.Add(enfant);
-            foreach (var tutorPair in tutors)
-            {
-                var TutorEnfant = new TutorEnfant
-                {
-                    Enfant = enfant,
-                    ApplicationUser = tutorPair.Item1,
-                    Relation = tutorPair.Item2
-                };
-                enfant.Tutors.Add(TutorEnfant);
-            }
+            _context.Enfants.Add(enfant);
+            //foreach (var tutorPair in tutors)
+            //{
+            //    var TutorEnfant = new TutorEnfant
+            //    {
+            //        Enfant = enfant,
+            //        ApplicationUser = tutorPair.Item1,
+            //        Relation = tutorPair.Item2
+            //    };
+            //    enfant.Tutors.Add(TutorEnfant);
+            //}
 
             await _context.SaveChangesAsync();
 

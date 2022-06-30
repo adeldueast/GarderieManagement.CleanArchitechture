@@ -25,6 +25,9 @@ namespace GarderieManagementClean.Application.Interfaces
 
         public Task<Result<object>> InviteUser(string userId, UserInviteUserRequest inviteUserRequest);
 
+        public Task<Result<object>> InviteTutor(string userId, UserInviteTutorRequest inviteTutorRequest);
+
+
         //REFRESH TOKENS
         public Task<object> RevokeTokensAsync(string userId);
 

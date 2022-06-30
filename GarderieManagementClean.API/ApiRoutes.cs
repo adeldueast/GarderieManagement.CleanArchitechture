@@ -29,6 +29,9 @@
 
             public const string InviteUser = Base + Account + "InviteUser";
 
+            public const string InviteTutor = Base + Account + "InviteTutor";
+
+
             public const string CompleteRegister = Base + Account + "CompleteRegister";
 
 

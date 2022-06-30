@@ -74,6 +74,12 @@ namespace GarderieManagementClean.API
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseCors(o =>
+            {
+                o.AllowAnyHeader();
+                o.AllowAnyMethod();
+                o.AllowAnyOrigin();
+            });
 
             app.UseHttpsRedirection();
 

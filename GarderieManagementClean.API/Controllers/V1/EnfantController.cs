@@ -72,7 +72,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 }
 
 
-                result.Data = _mapper.Map<List<EnfantResponse>>(result.Data as List<Enfant>);
+                result.Data = _mapper.Map<List<EnfantSummariesResponse>>(result.Data as List<Enfant>);
                 return Ok(result);
             }
             catch (Exception e)

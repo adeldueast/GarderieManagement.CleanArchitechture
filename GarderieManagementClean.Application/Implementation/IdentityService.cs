@@ -55,6 +55,13 @@ namespace GarderieManagementClean.Application.ServicesImplementation
             var result = await _identityRepository.InviteUser( userId,  inviteUserRequest);
             return result;
         }
+        public async Task<Result<object>> InviteTutor(string userId, UserInviteTutorRequest inviteUserRequest)
+        {
+            var result = await _identityRepository.InviteTutor(userId, inviteUserRequest);
+            return result;
+        }
+
+      
 
         public async Task<Result<object>> CompleteRegistration( UserCompleteRegistrationRequest completeRegistrationRequest)
         {

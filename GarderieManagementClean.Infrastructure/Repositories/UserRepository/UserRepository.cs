@@ -60,6 +60,8 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
 
             var role = await _context.Roles.SingleOrDefaultAsync(x => x.Name == "tutor");
             var tutorsUsers = await _context.Users.Where(x => x.GarderieId == user.GarderieId && x.UserRoles.Any(r => r.RoleId == role.Id)).ToListAsync();
+
+            
             return new Result<ApplicationUser>
             {
                 Success = true,

@@ -2,11 +2,13 @@
 using Contracts.Dtos;
 using GarderieManagementClean.API.Extensions;
 using GarderieManagementClean.Application.Interfaces.Services;
+using GarderieManagementClean.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
@@ -59,7 +61,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 {
                     return BadRequest(result);
                 }
-                result.Data = _mapper.Map<ApplicationUserDTO>(result.Data);
+                result.Data = _mapper.Map<List<ApplicationUserDTO>>(result.Data as List<ApplicationUser>);
                 return Ok(result);
             }
             catch (Exception e)

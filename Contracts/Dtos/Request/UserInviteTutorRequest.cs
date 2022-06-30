@@ -4,14 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Contracts.Request
+namespace Contracts.Dtos.Request
 {
-    public class UserRegistrationRequest
+    public class UserInviteTutorRequest
     {
         public string FirstName { get; set; }
+
         public string LastName { get; set; }
 
         public string Email { get; set; }
-        public string Password { get; set; }
+
+        public string Relation { get; set; }
+        public int EnfantId { get; set; }
     }
 }

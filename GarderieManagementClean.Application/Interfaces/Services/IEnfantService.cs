@@ -16,5 +16,8 @@ namespace GarderieManagementClean.Application.Interfaces.Services
         public Task<Result<Enfant>> createEnfant(string userId, EnfantCreateRequest newEnfant);
         public Task<Result<Enfant>> updateEnfant(string userId, EnfantUpdateRequest updatedEnfant);
         public Task<Result<Enfant>> deleteEnfant(string userId, int EnfantId);
+
+        public Task<Result<Enfant>> assignTutorToEnfant(string userId,EnfantAssignTutorRequest enfantAssignTutorRequest);
+
     }
 }

@@ -129,13 +129,38 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
         [Authorize(Roles = "owner,admin")]
-        [HttpGet(ApiRoutes.Enfant.Delete)]
+        [HttpPost(ApiRoutes.Enfant.Delete)]
         public async Task<IActionResult> deleteEnfant(int enfantId)
         {
             try
             {
                 var userId = HttpContext.GetUserId();
                 var result = await _enfantService.deleteEnfant(userId, enfantId);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, e.Message);
+            }
+        }
+
+
+
+        [Authorize(Roles = "owner,admin")]
+        [HttpPost(ApiRoutes.Enfant.AssignTutorToEnfant)]
+        public async Task<IActionResult> assignTutorToEnfant(EnfantAssignTutorRequest enfantAssignTutorRequest)
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+                var result = await _enfantService.assignTutorToEnfant(userId, enfantAssignTutorRequest);
 
                 if (!result.Success)
                 {

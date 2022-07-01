@@ -44,6 +44,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
             };
         }
 
+        //returns all tutors in the garderie
         public async Task<Result<ApplicationUser>> getAllTutors(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -59,14 +60,29 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
 
 
             var role = await _context.Roles.SingleOrDefaultAsync(x => x.Name == "tutor");
-            var tutorsUsers = await _context.Users.Where(x => x.GarderieId == user.GarderieId && x.UserRoles.Any(r => r.RoleId == role.Id)).ToListAsync();
+            if (role == null)
+            {
+                return new Result<ApplicationUser>()
+                {
+                   
+                    Errors = new List<string>() { $"Role '{role}' doesnt exist!" }
+                };
+            }
 
-            
+            var tutorsUsers = await _context.Users
+                .Where(
+                x => x.GarderieId == user.GarderieId && 
+                x.UserRoles.Any(r => r.RoleId == role.Id)).ToListAsync();
+
+
             return new Result<ApplicationUser>
             {
                 Success = true,
                 Data = tutorsUsers
             };
         }
+
+
+       
     }
 }

@@ -79,6 +79,9 @@
             public const string Update = Base + enfant + "Update";
 
             public const string Delete = Base + enfant + "Delete/{enfantId:int}";
+
+            public const string AssignTutorToEnfant = Base + enfant + "AssignTutorToEnfant";
+
         }
 
         public static class User

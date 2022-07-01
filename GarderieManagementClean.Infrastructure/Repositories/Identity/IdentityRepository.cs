@@ -204,6 +204,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
+            //check if child exist
             var enfant = await _context.Enfants.SingleOrDefaultAsync(e => e.GarderieId == currentUser.GarderieId && e.Id == inviteUserRequest.EnfantId);
             if (enfant == null)
             {
@@ -224,7 +225,6 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             }
 
-          
 
             //check if role is a valid Role (exist)
             string role = "tutor";
@@ -233,7 +233,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
             {
                 return new Result<object>()
                 {
-                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because Role '{role}' does not exist." }
+                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because role '{role}' does not exist." }
                 };
             }
 
@@ -246,9 +246,10 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Email = inviteUserRequest.Email,
                 UserName = inviteUserRequest.Email,
                 GarderieId = currentUser.GarderieId,
-
             };
 
+
+            //TODO: implement a email invitation to choose their own password
             //Create new password-less User
             var createdUser = await _userManager.CreateAsync(newUser, "password");
             if (!createdUser.Succeeded)
@@ -259,6 +260,10 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             };
 
+            //Assign role to user
+            await _userManager.AddToRoleAsync(newUser, role);
+
+            //Create relation between Tutor and Enfant
             newUser.Tutors.Add(
                 new TutorEnfant
                 {
@@ -269,8 +274,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
 
 
-            //Assign role to user
-            await _userManager.AddToRoleAsync(newUser, role);
+          
 
             await _context.SaveChangesAsync();
             //TODO: Send invite confirmation to user

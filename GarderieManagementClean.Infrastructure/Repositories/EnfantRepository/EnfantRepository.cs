@@ -329,5 +329,77 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
         {
             return await _userManager.FindByIdAsync(userId);
         }
+
+        public async Task<Result<Enfant>> assignTutorToEnfant(string userId, EnfantAssignTutorRequest enfantAssignTutorRequest)
+        {
+            var currentUser = await _userManager.FindByIdAsync(userId);
+
+
+            //Check if guardian exist
+            var tutor = await _context.Users.SingleOrDefaultAsync(u =>
+            u.GarderieId == currentUser.GarderieId &&
+            u.Id == enfantAssignTutorRequest.TutorId
+            );
+
+
+
+            if (tutor is null)
+            {
+               
+                return new Result<Enfant> { Errors = new List<string>() { $"Tutor '{enfantAssignTutorRequest.TutorId}' doesnt exist" } };
+            }
+
+            //Check if child exist
+            var enfant = await _context.Enfants.AsNoTracking().SingleOrDefaultAsync(u =>
+            u.GarderieId == currentUser.GarderieId &&
+            u.Id == enfantAssignTutorRequest.EnfantId);
+
+            if (enfant is null)
+            {
+                return new Result<Enfant> { Errors = new List<string>() { $"Enfant '{enfantAssignTutorRequest.EnfantId}' doesnt exist" } };
+            }
+
+
+            var hasRelation = tutor.Tutors.Any(te => te.EnfantId == enfant.Id);
+
+
+
+        
+            if (hasRelation)
+            {
+                var relation = await _context.TutorEnfant.SingleOrDefaultAsync(te => 
+                te.ApplicationUserId == tutor.Id &&
+                te.EnfantId == enfant.Id);
+                relation.Relation = enfantAssignTutorRequest.Relation;
+
+                // return new Result<Enfant> { Errors = new List<string>() { $"Tutor '{enfantAssignTutorRequest.TutorId}' is already a tutor of '{enfantAssignTutorRequest.EnfantId}'" } };
+
+            }
+            else
+            {
+                //added an existing relation makes an EXCEPTION 
+                tutor.Tutors.Add(
+                    new TutorEnfant()
+                    {
+                        ApplicationUserId = tutor.Id,
+                        EnfantId = enfant.Id,
+                        Relation = enfantAssignTutorRequest.Relation
+                    }
+                    );
+
+
+
+            }
+
+
+
+            await _context.SaveChangesAsync();
+            return new Result<Enfant>()
+            {
+                Success = true,
+                Data = "Assignation successful"
+            };
+
+        }
     }
 }

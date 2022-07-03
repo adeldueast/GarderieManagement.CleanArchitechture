@@ -92,6 +92,9 @@
 
             public const string GetAllTutors = Base + user + "tutors";
 
+            public const string GetAllChildsTutors = Base + user + "ChildsTutors";
+
+
 
             public const string GetAll = Base + user + "Get/";
 

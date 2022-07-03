@@ -70,5 +70,27 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
 
         }
+
+        [Authorize()]
+        [HttpGet(ApiRoutes.User.GetAllChildsTutors)]
+        public async Task<IActionResult> getAllChildsTutors(int enfantId)
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+                var result = await _userService.getAllChildsTutors(userId,enfantId);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                result.Data = _mapper.Map<List<TutorEnfantDTO>>(result.Data as List<TutorEnfant>);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+
+        }
     }
 }

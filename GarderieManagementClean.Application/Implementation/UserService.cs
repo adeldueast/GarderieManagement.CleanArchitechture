@@ -17,6 +17,12 @@ namespace GarderieManagementClean.Application.Implementation
         {
             _userRepository = userRepository;
         }
+
+        public Task<Result<ApplicationUser>> getAllChildsTutors(string userId, int enfantId)
+        {
+            return _userRepository.getAllChildsTutors(userId, enfantId);
+        }
+
         public Task<Result<ApplicationUser>> getAllEmployee(string userId)
         {
             return _userRepository.getAllEmployee(userId);

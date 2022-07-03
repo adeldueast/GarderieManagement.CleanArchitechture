@@ -64,14 +64,14 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
             {
                 return new Result<ApplicationUser>()
                 {
-                   
+
                     Errors = new List<string>() { $"Role '{role}' doesnt exist!" }
                 };
             }
 
             var tutorsUsers = await _context.Users
                 .Where(
-                x => x.GarderieId == user.GarderieId && 
+                x => x.GarderieId == user.GarderieId &&
                 x.UserRoles.Any(r => r.RoleId == role.Id)).ToListAsync();
 
 
@@ -83,6 +83,46 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
         }
 
 
-       
+        //returns all tutors in the garderie
+        public async Task<Result<ApplicationUser>> getAllChildsTutors(string userId, int enfantId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user.GarderieId is null)
+            {
+                return new Result<ApplicationUser>
+                {
+                    Errors = new List<string>() { "User doesnt have a garderie" }
+
+                };
+            }
+
+            var enfant = await _context.Enfants.SingleOrDefaultAsync(e => e.GarderieId == user.GarderieId && e.Id == enfantId);
+
+            if (enfant is null)
+            {
+                return new Result<ApplicationUser>
+                {
+                    Errors = new List<string>() { $"Enfant '{enfantId}' does not exist" }
+
+                };
+            }
+
+
+            //var childsTutors = await _context.Users
+            //    .Where(
+            //    tutor => tutor.GarderieId == user.GarderieId &&
+            //    tutor.Tutors.Any(r => r.EnfantId == enfantId)).ToListAsync();
+
+            var ct = await _context.TutorEnfant.Where(ct => ct.EnfantId == enfantId).ToListAsync();
+
+            return new Result<ApplicationUser>
+            {
+                Success = true,
+                Data = ct
+            };
+        }
+
+
     }
 }

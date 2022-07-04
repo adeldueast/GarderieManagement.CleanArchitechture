@@ -154,66 +154,25 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 };
             }
 
+
             Group group = null;
-            List<(ApplicationUser, string)> tutors = new List<(ApplicationUser, string)>();
             //check if groupId is valid
             if (updatedEnfant.GroupId != null && updatedEnfant.GroupId != 0)
             {
-                group = await _context.Groups.FindAsync(updatedEnfant.GroupId);
-                if (group is null)
-                {
-                    return new Result<Enfant>
-                    {
-                        Errors = new[] { $"Group '{updatedEnfant.GroupId}' doesnt exist" }
-                    };
-                }
+                group = await _context.Groups.SingleOrDefaultAsync(g => g.Id == updatedEnfant.GroupId && g.GarderieId == user.GarderieId);
             }
+            
+          
 
-            //check for dupliate in tutor list
-            var Temp = Guid.NewGuid().ToString();
-            foreach (var tutorPair in updatedEnfant.Tutors)
-            {
-                var tutorId = tutorPair.TutorEmail;
-                if (tutorId == Temp)
-                {
-                    return new Result<Enfant>
-                    {
-                        Errors = new List<string>() { $"Duplicate user '{tutorId}'" }
-                    };
-                }
-                Temp = tutorId;
-            }
+           
 
-            foreach (var tutorPair in updatedEnfant.Tutors)
-            {
-                var tutorDb = await _userManager.FindByEmailAsync(tutorPair.TutorEmail);
-                if (tutorDb == null || !await _userManager.IsInRoleAsync(tutorDb, "tutor"))
-                {
-                    return new Result<Enfant>
-                    {
-                        Errors = new List<string>() { $"Tutor '{tutorPair.TutorEmail}' doesnt exist or is not a tutor" }
-                    };
-                }
-                tutors.Add(new(tutorDb, tutorPair.Relation));
-            }
-
+           
 
 
             enfant.Nom = updatedEnfant.Nom;
             enfant.DateNaissance = updatedEnfant.DateNaissance;
-            enfant.Photo = updatedEnfant.Photo;
-            enfant.Group = group;
-            enfant.Tutors.Clear();
-            foreach (var tutor in tutors)
-            {
-                enfant.Tutors.Add(
-                    new TutorEnfant
-                    {
-                        ApplicationUser = tutor.Item1,
-                        Relation = tutor.Item2
-                    }
-                    );
-            }
+            enfant.GroupId = group == null ? null : group.Id;
+         
             await _context.SaveChangesAsync();
 
 

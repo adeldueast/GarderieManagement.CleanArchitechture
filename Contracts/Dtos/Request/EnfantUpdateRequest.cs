@@ -13,10 +13,9 @@ namespace Contracts.Dtos.Request
 
         public DateTime DateNaissance { get; set; }
 
-        public string Photo { get; set; } = "www.photo-url.com";
 
         public int? GroupId { get; set; }
 
-        public List<TutorRelationDTO> Tutors { get; set; }
+    
     }
 }

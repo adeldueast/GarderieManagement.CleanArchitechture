@@ -19,13 +19,18 @@ namespace GarderieManagementClean.Domain.Entities
 
         public virtual Garderie Garderie { get; set; }
 
-     
+
 
         public virtual Group Group { get; set; }
 
         public virtual List<RefreshToken> RefreshTokens { get; set; }
 
         public virtual List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
+
+
+        public bool EmergencyContact { get; set; }
+        public bool AuthorizePickup { get; set; }
+        public bool hasAccount { get; set; } = false;
 
         public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; }
         public virtual ICollection<IdentityUserLogin<string>> Logins { get; set; }

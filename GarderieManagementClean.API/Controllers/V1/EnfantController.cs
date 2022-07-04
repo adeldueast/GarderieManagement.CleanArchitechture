@@ -107,7 +107,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(Roles ="owner,admin")]
         [HttpPost(ApiRoutes.Enfant.Update)]
-        public async Task<IActionResult> updateEnfant([FromBody] EnfantUpdateRequest enfantUpdateRequest)
+        public async Task<IActionResult> updateEnfant([FromRoute] int enfantId ,[FromBody] EnfantUpdateRequest enfantUpdateRequest)
         {
             try
             {

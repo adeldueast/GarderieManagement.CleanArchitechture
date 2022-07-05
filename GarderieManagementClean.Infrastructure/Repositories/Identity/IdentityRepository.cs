@@ -127,25 +127,27 @@ namespace GarderieManagementClean.Infrastructure.Identity
             }
 
 
-
+            string[] roles = { "admin", "employee" };
 
             //check if role is a valid Role (exist)
-            var roleResult = await _roleManager.RoleExistsAsync(inviteUserRequest.Role);
-            if (!roleResult)
+            foreach (var role in roles)
             {
-                return new Result<object>()
+
+
+                var roleResult = await _roleManager.RoleExistsAsync(role);
+
+                if (!roleResult)
                 {
-                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because Role '{inviteUserRequest.Role}' does not exist." }
-                };
+                    return new Result<object>()
+                    {
+                        Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because Role '{role}' does not exist." }
+                    };
+                }
             }
 
-            if (inviteUserRequest.Role == "owner")
-            {
-                return new Result<object>()
-                {
-                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because you can only invite users as employees or tutors" }
-                };
-            }
+
+
+
 
             var newUser = new ApplicationUser
             {
@@ -154,6 +156,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Email = inviteUserRequest.Email,
                 UserName = inviteUserRequest.Email,
                 GarderieId = loggedInUser.GarderieId,
+                Phone = inviteUserRequest.Phone
             };
 
             //Create new password-less User
@@ -166,9 +169,14 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 };
             };
 
+            if (inviteUserRequest.isAdmin)
+            {
+                await _userManager.AddToRoleAsync(newUser, "admin");
 
-            //Assign role to user
-            await _userManager.AddToRoleAsync(newUser, inviteUserRequest.Role);
+            }
+            await _userManager.AddToRoleAsync(newUser, "employee");
+
+
 
             //TODO: Send invite confirmation to user
             // var EmailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
@@ -248,7 +256,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 GarderieId = currentUser.GarderieId,
                 EmergencyContact = inviteUserRequest.EmergencyContact,
                 AuthorizePickup = inviteUserRequest.AuthorizePickup,
-                
+
             };
 
 
@@ -277,7 +285,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
 
 
-          
+
 
             await _context.SaveChangesAsync();
             //TODO: Send invite confirmation to user

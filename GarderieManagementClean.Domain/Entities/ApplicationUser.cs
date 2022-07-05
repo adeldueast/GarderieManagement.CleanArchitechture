@@ -19,7 +19,7 @@ namespace GarderieManagementClean.Domain.Entities
 
         public virtual Garderie Garderie { get; set; }
 
-
+        public string Phone { get; set; }
 
         public virtual Group Group { get; set; }
 

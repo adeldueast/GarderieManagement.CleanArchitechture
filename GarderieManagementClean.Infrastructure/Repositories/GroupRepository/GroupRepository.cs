@@ -45,7 +45,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
             {
                 return new Result<Group>
                 {
-                    Errors = new List<string>() { $"Couldnt create group because user '{userId}' was not found" }
+                    Errors = new List<string>() { $"Couldnt create group because user '{newGroup.EducatriceId}' was not found" }
                 };
             }
 

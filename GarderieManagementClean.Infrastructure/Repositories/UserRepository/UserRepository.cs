@@ -21,6 +21,8 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
             _userManager = userManager;
             _context = context;
         }
+
+
         public async Task<Result<ApplicationUser>> getAllEmployee(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -83,7 +85,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
         }
 
 
-        //returns all tutors in the garderie
+        //returns all child's tutor in the garderie
         public async Task<Result<ApplicationUser>> getAllChildsTutors(string userId, int enfantId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -123,6 +125,31 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
             };
         }
 
+        public async Task<Result<ApplicationUser>> getAllEmployeeWithNoGroup(string userId)
+        {
 
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user.GarderieId is null)
+            {
+                return new Result<ApplicationUser>
+                {
+                    Errors = new List<string>() { "User doesnt have a garderie" }
+                };
+            }
+
+
+            var role = await _context.Roles.SingleOrDefaultAsync(x => x.Name == "employee");
+            var employeeUsers = await _context.Users.Where(x => 
+            x.GarderieId == user.GarderieId && 
+            x.Group == null &&
+            x.UserRoles.Any(r => r.RoleId == role.Id)).ToListAsync();
+
+            return new Result<ApplicationUser>
+            {
+                Success = true,
+                Data = employeeUsers
+            };
+        }
     }
 }

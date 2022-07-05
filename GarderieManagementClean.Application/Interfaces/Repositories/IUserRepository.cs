@@ -14,6 +14,9 @@ namespace GarderieManagementClean.Application.Interfaces.Repositories
 
         public Task<Result<ApplicationUser>> getAllTutors(string userId);
 
+        public Task<Result<ApplicationUser>> getAllEmployeeWithNoGroup(string userId);
+
+
         public Task<Result<ApplicationUser>> getAllChildsTutors(string userId, int enfantId);
     }
 }

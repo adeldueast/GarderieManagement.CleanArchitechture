@@ -28,6 +28,12 @@ namespace GarderieManagementClean.Application.Implementation
             return _userRepository.getAllEmployee(userId);
         }
 
+        public Task<Result<ApplicationUser>> getAllEmployeeWithNoGroup(string userId)
+        {
+            return _userRepository.getAllEmployeeWithNoGroup(userId);
+
+        }
+
         public Task<Result<ApplicationUser>> getAllTutors(string userId)
         {
             return _userRepository.getAllTutors(userId);

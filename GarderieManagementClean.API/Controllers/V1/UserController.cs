@@ -26,7 +26,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize()]
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpGet(ApiRoutes.User.GetAllEmployees)]
         public async Task<IActionResult> getAllEmlpoyees()
         {
@@ -38,7 +38,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 {
                     return BadRequest(result);
                 }
-                result.Data = _mapper.Map<ApplicationUserDTO>(result.Data);
+                result.Data = _mapper.Map<List<ApplicationUserDTO>>(result.Data as List<ApplicationUser>);
                 return Ok(result);
             }
             catch (Exception e)
@@ -49,7 +49,30 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize()]
+        [Authorize(Roles = "owner,admin,employee")]
+        [HttpGet(ApiRoutes.User.GetAllEmployeesNoGroup)]
+        public async Task<IActionResult> getAllEmlpoyeesNoGroup()
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+                var result = await _userService.getAllEmployeeWithNoGroup(userId);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                result.Data = _mapper.Map<List<ApplicationUserDTO>>(result.Data as List<ApplicationUser>);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+
+        }
+
+
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpGet(ApiRoutes.User.GetAllTutors)]
         public async Task<IActionResult> getAllTutors()
         {
@@ -71,7 +94,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
-        [Authorize()]
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpGet(ApiRoutes.User.GetAllChildsTutors)]
         public async Task<IActionResult> getAllChildsTutors(int enfantId)
         {

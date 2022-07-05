@@ -27,7 +27,7 @@
             public const string ConfirmEmailTest = Base + Account + "ConfirmEmailTEST/{userId}";
 
 
-            public const string InviteUser = Base + Account + "InviteUser";
+            public const string InviteStaff = Base + Account + "InviteStaff";
 
             public const string InviteTutor = Base + Account + "InviteTutor";
 
@@ -56,7 +56,7 @@
 
             public const string Get = Base + group + "Get/{groupId:int}";
 
-            public const string GetAll = Base + group + "Get/";
+            public const string GetAll = Base + group + "Get";
 
             public const string Create = Base + group + "Create";
 
@@ -89,6 +89,9 @@
             public const string user = "User/";
 
             public const string GetAllEmployees = Base + user + "employees";
+
+            public const string GetAllEmployeesNoGroup = Base + user + "employeesNoGroup";
+
 
             public const string GetAllTutors = Base + user + "tutors";
 

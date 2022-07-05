@@ -20,6 +20,7 @@ namespace GarderieManagementClean.Domain.Entities
         public int GarderieId { get; set; }
         public virtual Garderie Garderie { get; set; }
 
+        public string HexColor { get; set; }
 
         public virtual Local Local { get; set; }
 

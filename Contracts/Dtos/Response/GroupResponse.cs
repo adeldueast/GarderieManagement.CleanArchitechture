@@ -12,9 +12,13 @@ namespace Contracts.Dtos.Response
 
         public string Name { get; set; }
 
-        public string Photo { get; set; }
+        //public string Photo { get; set; }
 
-        public string EducatriceId { get; set; }
+        public string EducatriceFullName { get; set; }
+
+        public List<string> EnfantsIds { get; set; }
+
+        public string HexColor { get; set; }
 
     }
 }

@@ -96,7 +96,8 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
     
-        [HttpPost(ApiRoutes.Identity.InviteUser)]
+        //TODO: MOVE INVITE STAFF AND INVITE TUTOR IN USER REPOSITORY INSTEAD OF AUTH REPO
+        [HttpPost(ApiRoutes.Identity.InviteStaff)]
         public async Task<IActionResult> InviteUser([FromBody] UserInviteUserRequest inviteUserRequest)
         {
             try

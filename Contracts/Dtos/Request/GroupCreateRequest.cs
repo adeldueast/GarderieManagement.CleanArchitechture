@@ -12,10 +12,13 @@ namespace Contracts.Dtos.Request
 
         public string Name { get; set; }
 
-        public string Photo { get; set; }
+        //public string Photo { get; set; }
 
 
         public string EducatriceId { get; set; }
+
+
+        public string HexColor { get; set; }
 
 
     }

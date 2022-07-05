@@ -5,6 +5,7 @@ using Contracts.Dtos.Response;
 using Contracts.Request;
 using Contracts.Response;
 using GarderieManagementClean.Domain.Entities;
+using System.Linq;
 
 namespace GarderieManagementClean.API.MapperProfiles
 {
@@ -21,7 +22,15 @@ namespace GarderieManagementClean.API.MapperProfiles
             CreateMap<GroupUpdateRequest, Group>().ReverseMap();
 
             CreateMap<GroupResponse, Group>();
-            CreateMap<Group, GroupResponse>();
+
+            CreateMap<Group, GroupResponse>()
+            .ForMember(dest => dest.EducatriceFullName,
+                       opt => opt.MapFrom(src => $"{src.ApplicationUser.FirstName} {src.ApplicationUser.LastName}")
+                       )
+            .ForMember(dest => dest.EnfantsIds,
+                       opt => opt.MapFrom(src => src.Enfants.Select(e => e.Id).ToList())
+                       );
+
             CreateMap<GroupResponse, object>();
             CreateMap<object, GroupResponse>();
 

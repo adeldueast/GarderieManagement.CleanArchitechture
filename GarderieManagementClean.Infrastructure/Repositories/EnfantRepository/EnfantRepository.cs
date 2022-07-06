@@ -42,6 +42,25 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     Errors = new List<string>() { "User doesnt have a garderie" }
                 };
             }
+
+
+            Group group = null;
+            if (newEnfant.GroupId != null && newEnfant.GroupId != 0)
+            {
+                group = await _context.Groups.SingleOrDefaultAsync(g =>
+           g.GarderieId == user.GarderieId &&
+           g.Id == newEnfant.GroupId
+           );
+                if (group == null)
+                {
+                    return new Result<Enfant>
+                    {
+                        Errors = new List<string>() { $"Group '{newEnfant.GroupId}' doesnt exist" }
+                    };
+                }
+            }
+
+
             //if (!newEnfant.Tutors.Any())
             //{
             //    return new Result<Enfant>
@@ -100,7 +119,8 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
             {
                 Nom = newEnfant.Nom,
                 DateNaissance = newEnfant.DateNaissance,
-                GarderieId = (int)user.GarderieId
+                GarderieId = (int)user.GarderieId,
+                Group = group
             };
 
             _context.Enfants.Add(enfant);
@@ -115,7 +135,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
             //    enfant.Tutors.Add(TutorEnfant);
             //}
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); 
 
 
 
@@ -161,18 +181,18 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
             {
                 group = await _context.Groups.SingleOrDefaultAsync(g => g.Id == updatedEnfant.GroupId && g.GarderieId == user.GarderieId);
             }
-            
-          
 
-           
 
-           
+
+
+
+
 
 
             enfant.Nom = updatedEnfant.Nom;
             enfant.DateNaissance = updatedEnfant.DateNaissance;
             enfant.GroupId = group == null ? null : group.Id;
-         
+
             await _context.SaveChangesAsync();
 
 
@@ -304,7 +324,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
 
             if (tutor is null)
             {
-               
+
                 return new Result<Enfant> { Errors = new List<string>() { $"Tutor '{enfantAssignTutorRequest.TutorId}' doesnt exist" } };
             }
 
@@ -323,10 +343,10 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
 
 
 
-        
+
             if (hasRelation)
             {
-                var relation = await _context.TutorEnfant.SingleOrDefaultAsync(te => 
+                var relation = await _context.TutorEnfant.SingleOrDefaultAsync(te =>
                 te.ApplicationUserId == tutor.Id &&
                 te.EnfantId == enfant.Id);
                 relation.Relation = enfantAssignTutorRequest.Relation;

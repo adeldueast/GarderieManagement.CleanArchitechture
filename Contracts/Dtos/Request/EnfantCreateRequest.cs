@@ -16,7 +16,9 @@ namespace Contracts.Dtos.Request
         [Required(ErrorMessage = "DateNaissance is required")]
         public DateTime DateNaissance { get; set; }
 
-       // public string Photo { get; set; } = "www.photo-url.com";    
+        public int? GroupId { get; set; }
+
+        // public string Photo { get; set; } = "www.photo-url.com";    
 
         //public int? GroupId { get; set; }
 

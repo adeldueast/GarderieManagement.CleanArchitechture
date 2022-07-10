@@ -1,4 +1,5 @@
 using GarderieManagementClean.API.Extensions;
+using GarderieManagementClean.API.HubConfig;
 using GarderieManagementClean.API.Options;
 using GarderieManagementClean.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
@@ -30,6 +31,10 @@ namespace GarderieManagementClean.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Registering SignalR
+            services.AddSignalR(options =>
+            options.EnableDetailedErrors = true
+            );
 
             //Cors
             services.ConfigureCors();
@@ -62,6 +67,8 @@ namespace GarderieManagementClean.API
 
 
 
+
+
             //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
@@ -74,29 +81,34 @@ namespace GarderieManagementClean.API
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors(o =>
-            {
-                o.AllowAnyHeader();
-                o.AllowAnyMethod();
-                o.AllowAnyOrigin();
-            });
+            //app.UseCors(o =>
+            //{
+            //    o.AllowAnyHeader();
+            //    o.AllowAnyMethod();
+            //    o.AllowAnyOrigin();
+            //});
+
+
+
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCors("Allow all");
+
+
 
             var swaggerOptions = new SwaggerOptions();
             Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
             app.UseSwagger(options => { options.RouteTemplate = swaggerOptions.JsonRoute; });
             app.UseSwaggerUI(options => options.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description));
 
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChildrenHub>("/Children");
             });
         }
     }

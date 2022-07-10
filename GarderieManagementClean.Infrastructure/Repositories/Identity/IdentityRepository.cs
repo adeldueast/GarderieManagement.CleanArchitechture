@@ -567,6 +567,8 @@ namespace GarderieManagementClean.Infrastructure.Identity
             var claims = new List<Claim>
             {
                 new Claim("Id", user.Id),
+                new Claim("GarderieId", user.GarderieId == null ? Guid.NewGuid().ToString(): user.GarderieId.ToString() ),
+
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("FirstName", user.FirstName is  not null ? user.FirstName:""),
                 new Claim("LastName", user.LastName is not null ? user.LastName:""),

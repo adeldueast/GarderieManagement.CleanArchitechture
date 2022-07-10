@@ -13,5 +13,14 @@ namespace GarderieManagementClean.API.Extensions
             }
             return httpContext.User.Claims.Single(x => x.Type == "Id").Value;
         }
+
+        public static string GetUserGarderieId(this HttpContext httpContext)
+        {
+            if (httpContext.User == null)
+            {
+                return string.Empty;
+            }
+            return httpContext.User.Claims.Single(x => x.Type == "GarderieId").Value;
+        }
     }
 }

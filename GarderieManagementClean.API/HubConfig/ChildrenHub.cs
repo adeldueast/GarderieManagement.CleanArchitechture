@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.HubConfig
@@ -18,23 +20,39 @@ namespace GarderieManagementClean.API.HubConfig
         {
             _context = context;
         }
-        public override Task OnConnectedAsync()
+        public override async Task<Task> OnConnectedAsync()
         {
-            string garderie_group = Context.User.Claims.Single(x => x.Type == "GarderieId").Value;
+            string userId = Context.User.Claims.Single(x => x.Type == "Id").Value;
+            string email = Context.User.Claims.Single(x => x.Type == ClaimTypes.Email).Value;
+            string garderieId = Context.User.Claims.Single(x => x.Type == "GarderieId").Value;
+            var user = await _context.Users.SingleAsync(x => x.Id == userId);
+            user.isOnline = true;
+            await _context.SaveChangesAsync();
 
-            Groups.AddToGroupAsync(Context.ConnectionId, garderie_group);
+            await Groups.AddToGroupAsync(Context.ConnectionId, garderieId);
+            Debug.WriteLine($"User {email} joined group {garderieId}");
 
+            await Clients.Group(garderieId).SendAsync("notifyUserStatusChanges", $"User {email} is online in garderie {garderieId}");
             return base.OnConnectedAsync();
 
         }
 
-        public override Task OnDisconnectedAsync(Exception stopCalled)
+        public override async Task<Task> OnDisconnectedAsync(Exception stopCalled)
         {
-          
 
+            string userId = Context.User.Claims.Single(x => x.Type == "Id").Value;
+            string email = Context.User.Claims.Single(x => x.Type == ClaimTypes.Email).Value;
+            string garderieId = Context.User.Claims.Single(x => x.Type == "GarderieId").Value;
+            var user = await _context.Users.SingleAsync(x => x.Id == userId);
+            user.isOnline = false;
+            await _context.SaveChangesAsync();
+
+            Debug.WriteLine($"User {email} disconnected in garderie {garderieId}");
+            await Clients.Group(garderieId).SendAsync("notifyUserStatusChanges", $"User {email} disconnected");
 
             return base.OnDisconnectedAsync(stopCalled);
         }
+
 
 
     }

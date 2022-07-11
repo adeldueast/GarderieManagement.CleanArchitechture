@@ -32,6 +32,8 @@ namespace GarderieManagementClean.Domain.Entities
         public bool AuthorizePickup { get; set; }
         public bool hasAccount { get; set; } = false;
 
+        public bool isOnline { get; set; } = false;
+
         public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; }
         public virtual ICollection<IdentityUserLogin<string>> Logins { get; set; }
         public virtual ICollection<IdentityUserToken<string>> Tokens { get; set; }

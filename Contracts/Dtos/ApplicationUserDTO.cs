@@ -23,6 +23,8 @@ namespace Contracts.Dtos
         public bool EmergencyContact { get; set; }
         public bool AuthorizePickup { get; set; }
 
+        public bool isOnline { get; set; }
+
         //TODO: Add Phone and Address and isAuthorize to pickup the child and shouldContact in emergency case 
 
     }

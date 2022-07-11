@@ -23,13 +23,14 @@ namespace GarderieManagementClean.API.Controllers.V1
     {
         private readonly IEnfantService _enfantService;
         private readonly IMapper _mapper;
-        private IHubContext<ChildrenHub> _hub;
-        public EnfantController(IEnfantService enfantService, IMapper mapper, IHubContext<ChildrenHub> hub)
+
+        private readonly IHubContext<ChildrenHub> _hubContext;
+        public EnfantController(IEnfantService enfantService, IMapper mapper, IHubContext<ChildrenHub> hubContext)
         {
             _enfantService = enfantService;
             _mapper = mapper;
-            _hub = hub;
-            
+           
+            _hubContext = hubContext;
         }
 
 
@@ -124,9 +125,11 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(result);
                 }
                 result.Data = _mapper.Map<EnfantResponse>(result.Data);
-                //NOTIFY ALL SUBSCRIBED CLIENTS
-                await _hub.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
 
+
+                //NOTIFY ALL SUBSCRIBED CLIENTS 
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
+               
                 return Ok(result);
             }
             catch (Exception e)

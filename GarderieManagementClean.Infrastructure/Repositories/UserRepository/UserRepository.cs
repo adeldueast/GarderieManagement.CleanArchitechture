@@ -36,9 +36,12 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
             }
 
 
-            var role = await _context.Roles.SingleOrDefaultAsync(x => x.Name == "employee");
-            var employeeUsers = await _context.Users.Where(x => x.GarderieId == user.GarderieId && x.UserRoles.Any(r => r.RoleId == role.Id)).ToListAsync();
+            var rolesIds = await _context.Roles.Where(r => r.Name == "admin" || r.Name == "owner" || r.Name == "employee").Select(r => r.Id).ToListAsync();
+            var employeeUsers = await _context.Users.Where(u =>
+            u.GarderieId == user.GarderieId &&
+            u.UserRoles.Any(r => rolesIds.Contains(r.RoleId))).ToListAsync();
 
+            employeeUsers.Remove(user);
             return new Result<ApplicationUser>
             {
                 Success = true,
@@ -140,8 +143,8 @@ namespace GarderieManagementClean.Infrastructure.Repositories.UserRepository
 
 
             var role = await _context.Roles.SingleOrDefaultAsync(x => x.Name == "employee");
-            var employeeUsers = await _context.Users.Where(x => 
-            x.GarderieId == user.GarderieId && 
+            var employeeUsers = await _context.Users.Where(x =>
+            x.GarderieId == user.GarderieId &&
             x.Group == null &&
             x.UserRoles.Any(r => r.RoleId == role.Id)).ToListAsync();
 

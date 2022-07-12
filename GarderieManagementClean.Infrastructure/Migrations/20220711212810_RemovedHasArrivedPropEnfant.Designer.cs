@@ -4,14 +4,16 @@ using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220711212810_RemovedHasArrivedPropEnfant")]
+    partial class RemovedHasArrivedPropEnfant
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -153,13 +155,13 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime?>("AbsenceDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("AbsenceDescription")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ArrivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("EnfantId")

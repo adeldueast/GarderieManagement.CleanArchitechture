@@ -4,21 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GarderieManagementClean.Domain.Entities
+namespace Contracts.Dtos.Response
 {
-    public class Attendance
+    public class AttendanceResponse
     {
         public int Id { get; set; }
 
         public DateTime? ArrivedAt { get; set; }
         public DateTime? LeftAt { get; set; }
 
-        public DateTime? AbsenceDate { get; set; } 
+        public DateTime? Date { get; set; }
         public string AbsenceDescription { get; set; }
 
 
         public int EnfantId { get; set; }
-        public virtual Enfant Enfant { get; set; }
 
     }
 }

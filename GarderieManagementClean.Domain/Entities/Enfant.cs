@@ -26,6 +26,7 @@ namespace GarderieManagementClean.Domain.Entities
         public virtual List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
 
 
+        public virtual List<Attendance> Attendances { get; set; }
 
         public int? LocalId { get; set; }
         public virtual Local Local { get; set; }

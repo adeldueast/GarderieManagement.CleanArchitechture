@@ -29,7 +29,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         {
             _enfantService = enfantService;
             _mapper = mapper;
-           
+
             _hubContext = hubContext;
         }
 
@@ -77,8 +77,9 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(result);
                 }
 
+                //   result.Data = _mapper.Map<List<EnfantSummariesResponse>>(result.Data as List<Enfant>);
+                // result.Data = _mapper.Map(da,result.Data as List<Enfant>);
 
-                result.Data = _mapper.Map<List<EnfantSummariesResponse>>(result.Data as List<Enfant>);
                 return Ok(result);
             }
             catch (Exception e)
@@ -113,11 +114,11 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(Roles = "owner,admin")]
         [HttpPost(ApiRoutes.Enfant.Update)]
-        public async Task<IActionResult> updateEnfant( [FromBody] EnfantUpdateRequest enfantUpdateRequest)
+        public async Task<IActionResult> updateEnfant([FromBody] EnfantUpdateRequest enfantUpdateRequest)
         {
             try
             {
-             
+
                 var userId = HttpContext.GetUserId();
                 var result = await _enfantService.updateEnfant(userId, enfantUpdateRequest);
                 if (!result.Success)
@@ -129,7 +130,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
                 //NOTIFY ALL SUBSCRIBED CLIENTS 
                 await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
-               
+
                 return Ok(result);
             }
             catch (Exception e)

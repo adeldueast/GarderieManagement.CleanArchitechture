@@ -10,6 +10,7 @@ using GarderieManagementClean.Infrastructure.Identity;
 
 using GarderieManagementClean.Infrastructure.Persistence;
 using GarderieManagementClean.Infrastructure.Repositories;
+using GarderieManagementClean.Infrastructure.Repositories.AttendanceRepository;
 using GarderieManagementClean.Infrastructure.Repositories.EnfantRepository;
 using GarderieManagementClean.Infrastructure.Repositories.GroupRepository;
 using GarderieManagementClean.Infrastructure.Repositories.JournalRepository;
@@ -183,7 +184,9 @@ namespace GarderieManagementClean.API.Extensions
             services.AddScoped<IJournalDeBordService, JournalDeBordService>();
             services.AddScoped<IJournalDeBordRepository, JournalRepository>();
 
-
+            //enfant  service/repository
+            //services.AddScoped<IAttendanceService, AttendanceService>();
+            //services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 
             //email service
             services.AddTransient<IEmailService, EmailService>();

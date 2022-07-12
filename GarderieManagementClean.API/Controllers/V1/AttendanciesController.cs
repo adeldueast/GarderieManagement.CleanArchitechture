@@ -1,9 +1,13 @@
-﻿using GarderieManagementClean.API.Extensions;
+﻿using AutoMapper;
+using Contracts.Dtos.Request;
+using Contracts.Dtos.Response;
+using GarderieManagementClean.API.Extensions;
 using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,16 +18,19 @@ using System.Threading.Tasks;
 namespace GarderieManagementClean.API.Controllers.V1
 {
     [Authorize(Roles = "owner,admin,employee")]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class AttendanciesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        public AttendanciesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        private readonly IMapper _mapper;
+
+        public AttendanciesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
             _context = context;
             _userManager = userManager;
+            _mapper = mapper;
         }
 
 
@@ -31,38 +38,60 @@ namespace GarderieManagementClean.API.Controllers.V1
         [HttpPost("Arrived/{enfantId}")]
         public async Task<IActionResult> Arrived([FromRoute] int enfantId)
         {
+            //Get current loggedIn User
             var userId = HttpContext.GetUserId();
             var user = await _userManager.FindByIdAsync(userId);
-            var enfant = _context.Enfants.SingleOrDefault(e => e.Id == enfantId && e.GarderieId == user.GarderieId);
+
+            //Get Child based on current User's organization (GarderieId => GurserieId ) and ChildId
+            var enfant = _context.Enfants.AsNoTracking().SingleOrDefault(e =>
+                e.Id == enfantId &&
+                e.GarderieId == user.GarderieId
+            );
+
+            //Child not found error response
             if (enfant == null) return NotFound($"Enfant '{enfantId}' does not exist");
 
-            //Check if an attendance record already exist
-            var attendance = _context.Attendances.SingleOrDefault(attendance => attendance.EnfantId == enfant.Id && attendance.Date.Date == DateTime.Now.Date);
+            //Check if an attendance record already exist for today
+            var attendance = await _context.Attendances.SingleOrDefaultAsync(attendance =>
+            attendance.EnfantId == enfant.Id &&
+            (
+            attendance.ArrivedAt.Value.Date == DateTime.Now.Date ||
+            attendance.AbsenceDate.Value.Date == DateTime.Now.Date
+            )
+
+            );
 
             //If Attendance already exist
-            //1- He already arrived
-            //2- He was placed absent for that current day
+            //1- He either arrived in the nurserie
+            //2- He was set as  Absent for that current day (ArrivedAt = null BUT AbsenceDate is not null ) 
+            //in both case we clear the absence, and simply set the arrivedAt to Current DateTime
             if (attendance != null)
             {
                 attendance.ArrivedAt = DateTime.Now;
                 attendance.LeftAt = null;
-                attendance.AbsenceDescription = "";
+                attendance.AbsenceDate = null;
+                attendance.AbsenceDescription = null;
                 await _context.SaveChangesAsync();
-                return Ok(attendance);
+                var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
+                return Ok(dto_attendance1);
+          
             }
 
 
             //Else, simply create a new attendance with a date (present)
             attendance = new Attendance
             {
-                Enfant = enfant,
+                EnfantId = enfant.Id,
                 ArrivedAt = DateTime.Now,
             };
 
+        
 
             _context.Add(attendance);
             await _context.SaveChangesAsync();
-            return Ok(attendance);
+
+            var dto_attendance = _mapper.Map<Attendance>(attendance);
+            return Ok(dto_attendance);
 
 
 
@@ -73,21 +102,24 @@ namespace GarderieManagementClean.API.Controllers.V1
         {
             var userId = HttpContext.GetUserId();
             var user = await _userManager.FindByIdAsync(userId);
-            var enfant = _context.Enfants.SingleOrDefault(e => e.Id == enfantId && e.GarderieId == user.GarderieId);
+            var enfant = _context.Enfants.AsNoTracking().SingleOrDefault(e => e.Id == enfantId && e.GarderieId == user.GarderieId);
             if (enfant == null) return NotFound($"Enfant '{enfantId}' does not exist");
 
-            var attendance = _context.Attendances.SingleOrDefault(attendance => attendance.EnfantId == enfant.Id && attendance.Date.Date == DateTime.Now.Date);
-            
+            var attendance = await _context.Attendances.SingleOrDefaultAsync(attendance =>
+            attendance.EnfantId == enfant.Id &&
+            attendance.ArrivedAt.Value.Date == DateTime.Now.Date
+            );
+
             //If Attendance doesnt exist
             if (attendance == null) return BadRequest($"Enfant '{enfantId}' has not arrived yet");
 
-            if (attendance.ArrivedAt == null) return BadRequest($"Enfant '{enfantId}' has not arrived yet");
 
 
             attendance.LeftAt = DateTime.Now;
             await _context.SaveChangesAsync();
-
-            return Ok(attendance);
+            var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
+            return Ok(dto_attendance);
+      
 
 
 
@@ -95,38 +127,50 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
         [HttpPost("Absent/{enfantId}")]
-        public async Task<IActionResult> Absent([FromRoute] int enfantId, [FromBody] string AbsenceReason)
+        public async Task<IActionResult> createAbsence([FromBody] AttendanceCreateAbsenceRequest attendanceCreateAbsenceRequest)
         {
             var userId = HttpContext.GetUserId();
             var user = await _userManager.FindByIdAsync(userId);
-            var enfant = _context.Enfants.SingleOrDefault(e => e.Id == enfantId && e.GarderieId == user.GarderieId);
-            if (enfant == null) return NotFound($"Enfant '{enfantId}' does not exist");
+            var enfant = _context.Enfants.AsNoTracking().SingleOrDefault(e => e.Id == attendanceCreateAbsenceRequest.EnfantId && e.GarderieId == user.GarderieId);
+            if (enfant == null) return NotFound($"Enfant '{attendanceCreateAbsenceRequest.EnfantId}' does not exist");
 
-            var attendance = _context.Attendances.SingleOrDefault(attendance => attendance.EnfantId == enfant.Id && attendance.Date.Date == DateTime.Now.Date);
+            var attendance = await _context.Attendances.SingleOrDefaultAsync(attendance =>
+                attendance.EnfantId == enfant.Id &&
+                (
+                attendance.AbsenceDate.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date ||
+                attendance.ArrivedAt.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date
+                )
+            );
 
             //If attendance exists
-            //1) he was present 
-            //2) he was absent
+            //1) he has arrived (present) 
+            //2) he was set to Absent for that day
             //in both case, we simply clear all and give absence reason 
             if (attendance != null)
             {
+
                 attendance.ArrivedAt = null;
                 attendance.LeftAt = null;
-                attendance.AbsenceDescription = AbsenceReason;
+                attendance.AbsenceDate = attendanceCreateAbsenceRequest.AbsenceDate;
+                attendance.AbsenceDescription = attendanceCreateAbsenceRequest.AbsenceDescription;
                 await _context.SaveChangesAsync();
-                return Ok(attendance);
+                var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
+                return Ok(dto_attendance1);
             }
 
             //Else, create absence attendance (ArrivedAt = null)
             attendance = new Attendance
             {
-                Id = enfantId,
-                AbsenceDescription = AbsenceReason,
+                EnfantId = attendanceCreateAbsenceRequest.EnfantId,
+                AbsenceDate = attendanceCreateAbsenceRequest.AbsenceDate,
+                AbsenceDescription = attendanceCreateAbsenceRequest.AbsenceDescription,
 
             };
+
             _context.Add(attendance);
             await _context.SaveChangesAsync();
-            return Ok(attendance);
+            var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
+            return Ok(dto_attendance);
 
         }
 

@@ -48,7 +48,7 @@ namespace GarderieManagementClean.API
             services.ConfigureIdentity();
 
             //UnitOfWork Singleton
-            services.ConfigureUnitOfWork();
+            //services.ConfigureUnitOfWork();
 
             //Controllers
             services.ConfigureControllers();

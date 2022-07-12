@@ -1,5 +1,6 @@
 ﻿using Contracts.Dtos;
 using Contracts.Dtos.Request;
+using Contracts.Dtos.Response;
 using GarderieManagementClean.Application.Interfaces.Repositories;
 using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Domain.Entities;
@@ -135,7 +136,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
             //    enfant.Tutors.Add(TutorEnfant);
             //}
 
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
 
 
@@ -245,13 +246,6 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
         public async Task<Result<Enfant>> getAllEnfants(string userId)
         {
             var user = await getUserById(userId);
-            if (user == null)
-            {
-                return new Result<Enfant>
-                {
-                    Errors = new List<string>() { "User not found" }
-                };
-            }
             if (user.GarderieId == null)
             {
                 return new Result<Enfant>
@@ -260,7 +254,21 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 };
             }
 
-            var enfants = await _context.Enfants.Where(x => x.GarderieId == user.GarderieId).ToListAsync();
+            var enfants = await _context.Enfants
+                .Where(x => x.GarderieId == user.GarderieId)
+                .Select(x => new EnfantSummariesResponse()
+                {
+                    Id = x.Id,
+                    Nom = x.Nom,
+                    hasArrived = x.Attendances.Any(attendance =>
+
+                    (attendance.ArrivedAt.Value.Date == DateTime.Now.Date &&  !attendance.LeftAt.HasValue)
+                    //!(attendance.ArrivedAt.Value.Date == DateTime.Now.Date && attendance.LeftAt.Value.Date == DateTime.Now.Date) ||
+
+
+                    )
+                })
+                .ToListAsync();
 
 
             return new Result<Enfant>

@@ -2,11 +2,13 @@
 using Contracts.Dtos.Request;
 using Contracts.Dtos.Response;
 using GarderieManagementClean.API.Extensions;
+using GarderieManagementClean.API.HubConfig;
 using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -25,12 +27,15 @@ namespace GarderieManagementClean.API.Controllers.V1
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly IHubContext<ChildrenHub> _hubContext;
 
-        public AttendanciesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper)
+
+        public AttendanciesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper, IHubContext<ChildrenHub> hubContext)
         {
             _context = context;
             _userManager = userManager;
             _mapper = mapper;
+            _hubContext = hubContext;
         }
 
 
@@ -73,6 +78,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                 attendance.AbsenceDescription = null;
                 await _context.SaveChangesAsync();
                 var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance1);
+
                 return Ok(dto_attendance1);
           
             }
@@ -91,6 +98,9 @@ namespace GarderieManagementClean.API.Controllers.V1
             await _context.SaveChangesAsync();
 
             var dto_attendance = _mapper.Map<Attendance>(attendance);
+            //NOTIFY ALL SUBSCRIBED CLIENTS 
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
+
             return Ok(dto_attendance);
 
 
@@ -118,6 +128,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             attendance.LeftAt = DateTime.Now;
             await _context.SaveChangesAsync();
             var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
             return Ok(dto_attendance);
       
 
@@ -155,6 +166,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 attendance.AbsenceDescription = attendanceCreateAbsenceRequest.AbsenceDescription;
                 await _context.SaveChangesAsync();
                 var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance1);
                 return Ok(dto_attendance1);
             }
 
@@ -170,6 +182,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             _context.Add(attendance);
             await _context.SaveChangesAsync();
             var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
             return Ok(dto_attendance);
 
         }

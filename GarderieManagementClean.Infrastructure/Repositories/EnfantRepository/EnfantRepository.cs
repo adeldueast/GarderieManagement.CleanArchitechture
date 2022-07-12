@@ -261,11 +261,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     Id = x.Id,
                     Nom = x.Nom,
                     hasArrived = x.Attendances.Any(attendance =>
-
-                    (attendance.ArrivedAt.Value.Date == DateTime.Now.Date &&  !attendance.LeftAt.HasValue)
-                    //!(attendance.ArrivedAt.Value.Date == DateTime.Now.Date && attendance.LeftAt.Value.Date == DateTime.Now.Date) ||
-
-
+                    attendance.ArrivedAt.Value.Date == DateTime.Now.Date &&  !attendance.LeftAt.HasValue
                     )
                 })
                 .ToListAsync();

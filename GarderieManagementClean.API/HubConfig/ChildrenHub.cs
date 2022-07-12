@@ -36,12 +36,6 @@ namespace GarderieManagementClean.API.HubConfig
 
         }
 
-        private void getUserInfoFromToken(out string userId, out string email, out string garderieId)
-        {
-            userId = Context.User.Claims.Single(x => x.Type == "Id").Value;
-            email = Context.User.Claims.Single(x => x.Type == ClaimTypes.Email).Value;
-            garderieId = Context.User.Claims.Single(x => x.Type == "GarderieId").Value;
-        }
 
         public override async Task<Task> OnDisconnectedAsync(Exception stopCalled)
         {
@@ -57,6 +51,15 @@ namespace GarderieManagementClean.API.HubConfig
         }
 
 
+        #region HELPER METHODS
+
+        private void getUserInfoFromToken(out string userId, out string email, out string garderieId)
+        {
+            userId = Context.User.Claims.Single(x => x.Type == "Id").Value;
+            email = Context.User.Claims.Single(x => x.Type == ClaimTypes.Email).Value;
+            garderieId = Context.User.Claims.Single(x => x.Type == "GarderieId").Value;
+        }
+        #endregion
 
     }
 }

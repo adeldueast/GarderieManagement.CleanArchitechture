@@ -72,16 +72,22 @@ namespace GarderieManagementClean.API.Controllers.V1
             //in both case we clear the absence, and simply set the arrivedAt to Current DateTime
             if (attendance != null)
             {
+
+             
+
+
                 attendance.ArrivedAt = DateTime.Now;
                 attendance.LeftAt = null;
                 attendance.AbsenceDate = null;
                 attendance.AbsenceDescription = null;
                 await _context.SaveChangesAsync();
                 var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
-                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance1);
+
+                Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId2);
+                await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId2).SendAsync("childAttendanceUpdate", dto_attendance1);
 
                 return Ok(dto_attendance1);
-          
+
             }
 
 
@@ -92,14 +98,15 @@ namespace GarderieManagementClean.API.Controllers.V1
                 ArrivedAt = DateTime.Now,
             };
 
-        
+
 
             _context.Add(attendance);
             await _context.SaveChangesAsync();
 
-            var dto_attendance = _mapper.Map<Attendance>(attendance);
+            var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
             //NOTIFY ALL SUBSCRIBED CLIENTS 
-            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
+            Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId);
+            await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId).SendAsync("childAttendanceUpdate", dto_attendance);
 
             return Ok(dto_attendance);
 
@@ -128,9 +135,10 @@ namespace GarderieManagementClean.API.Controllers.V1
             attendance.LeftAt = DateTime.Now;
             await _context.SaveChangesAsync();
             var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
-            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
+            Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId);
+            await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId).SendAsync("childAttendanceUpdate", dto_attendance);
             return Ok(dto_attendance);
-      
+
 
 
 
@@ -147,11 +155,8 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             var attendance = await _context.Attendances.SingleOrDefaultAsync(attendance =>
                 attendance.EnfantId == enfant.Id &&
-                (
-                attendance.AbsenceDate.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date ||
-                attendance.ArrivedAt.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date
-                )
-            );
+                ( attendance.AbsenceDate.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date ||attendance.ArrivedAt.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date)
+                );
 
             //If attendance exists
             //1) he has arrived (present) 
@@ -159,6 +164,10 @@ namespace GarderieManagementClean.API.Controllers.V1
             //in both case, we simply clear all and give absence reason 
             if (attendance != null)
             {
+                if (attendance.AbsenceDate.HasValue)
+                {
+                    return BadRequest();
+                }
 
                 attendance.ArrivedAt = null;
                 attendance.LeftAt = null;
@@ -166,7 +175,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                 attendance.AbsenceDescription = attendanceCreateAbsenceRequest.AbsenceDescription;
                 await _context.SaveChangesAsync();
                 var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
-                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance1);
+                Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId2);
+                await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId2).SendAsync("childAttendanceUpdate", dto_attendance1);
                 return Ok(dto_attendance1);
             }
 
@@ -182,10 +192,42 @@ namespace GarderieManagementClean.API.Controllers.V1
             _context.Add(attendance);
             await _context.SaveChangesAsync();
             var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
-            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
+            Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId);
+            await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId).SendAsync("childAttendanceUpdate", dto_attendance);
             return Ok(dto_attendance);
 
         }
+
+
+        [HttpGet("{enfantId}")]
+        public async Task<IActionResult> getChildsAttendances([FromRoute] int enfantId)
+        {
+            var userId = HttpContext.GetUserId();
+            var user = await _userManager.FindByIdAsync(userId);
+            var enfant = _context.Enfants.AsNoTracking().SingleOrDefault(e =>
+            e.Id == enfantId &&
+            e.GarderieId == user.GarderieId
+            );
+            if (enfant == null) return NotFound($"Enfant '{enfantId}' does not exist");
+
+
+            var enfant_attendances = await _context.Attendances
+                .Where(a => a.EnfantId == enfantId)
+                .Select(a => new AttendanceResponse()
+                {
+                    Id = a.Id,
+                    Present = a.ArrivedAt.HasValue ? true : false,
+                    Date = a.ArrivedAt.HasValue ? a.ArrivedAt.Value : a.AbsenceDate.Value,
+                    AbsenceDescription = a.AbsenceDescription,
+
+                })
+                .ToListAsync();
+
+
+            return Ok(enfant_attendances);
+
+        }
+
 
 
     }

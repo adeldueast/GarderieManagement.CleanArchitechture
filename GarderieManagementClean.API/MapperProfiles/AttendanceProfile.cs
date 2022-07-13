@@ -8,7 +8,16 @@ namespace GarderieManagementClean.API.MapperProfiles
     {
         public AttendanceProfile()
         {
-            CreateMap<Attendance, AttendanceResponse>();
+            //Id = a.Id,
+            //Present = a.ArrivedAt.HasValue ? true : false,
+            //Date = a.ArrivedAt.HasValue ? a.ArrivedAt.Value : a.AbsenceDate.Value,
+            //AbsenceDescription = a.AbsenceDescription,
+            CreateMap<Attendance, AttendanceResponse>()
+                .ForMember(dest => dest.Present,
+                    opt => opt.MapFrom(src => src.ArrivedAt.HasValue ? true : false))
+                .ForMember(dest => dest.Date,
+                    opt => opt.MapFrom(src => src.ArrivedAt.HasValue ? src.ArrivedAt.Value : src.AbsenceDate.Value));
+
 
         }
     }

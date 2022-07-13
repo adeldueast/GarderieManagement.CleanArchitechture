@@ -10,14 +10,11 @@ namespace Contracts.Dtos.Response
     {
         public int Id { get; set; }
 
-        public DateTime? ArrivedAt { get; set; }
-        public DateTime? LeftAt { get; set; }
+        public bool Present { get; set; }
 
-        public DateTime? Date { get; set; }
+        public DateTime Date { get; set; }
+
         public string AbsenceDescription { get; set; }
-
-
-        public int EnfantId { get; set; }
 
     }
 }

@@ -3,6 +3,7 @@ using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,13 +72,46 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
         }
 
+        public async Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            var enfant = await _context.Enfants.SingleOrDefaultAsync(e => e.Id == enfantId && e.GarderieId == user.GarderieId);
+            if (enfant == null)
+            {
+                return new Result<JournalDeBord>()
+                {
+                    Errors = new string[] { $"Enfant '{enfantId}' doesnt exist" }
+                };
+            }
+
+
+            var existingJournal = _context.JournalDeBords.SingleOrDefault(j =>
+                j.EnfantId == enfantId &&
+                j.CreatedAt.Date == DateTime.Now.Date
+            );
+
+
+            return new Result<JournalDeBord>()
+            {
+                Success = true,
+                Data = existingJournal,
+
+            };
+
+        }
+
         public async Task<Result<JournalDeBord>> updateJournal(string userId, JournalDeBord updatedJournal)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
-          
 
-            var existingJournal = _context.JournalDeBords.SingleOrDefault(j => j.Id == updatedJournal.Id && j.Enfant.GarderieId == user.GarderieId);
+
+            var existingJournal = _context.JournalDeBords.SingleOrDefault(j =>
+            j.EnfantId == updatedJournal.EnfantId &&
+            j.Enfant.GarderieId == user.GarderieId &&
+            j.CreatedAt.Date.Date == DateTime.Now.Date
+            );
             //if not found, return error
             if (existingJournal == null)
             {
@@ -89,11 +123,15 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
             }
 
             existingJournal.Humeur_Rating = updatedJournal.Humeur_Rating;
-            existingJournal.Humeur_Description = updatedJournal.Humeur_Description;
             existingJournal.Manger_Rating = updatedJournal.Manger_Rating;
-            existingJournal.Manger_Description = updatedJournal.Manger_Description;
             existingJournal.Toilette_Rating = updatedJournal.Toilette_Rating;
-            existingJournal.Toilette_Description = updatedJournal.Toilette_Description;
+            existingJournal.Participation_Rating = updatedJournal.Participation_Rating;
+
+            existingJournal.Activite_Message = updatedJournal.Activite_Message;
+            existingJournal.Manger_Message = updatedJournal.Manger_Message;
+            existingJournal.Commentaire_Message = updatedJournal.Commentaire_Message;
+
+
             existingJournal.LastUpdatedAt = DateTime.Now;
             existingJournal.LastUpdatedBy = user.Email;
 

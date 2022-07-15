@@ -112,13 +112,11 @@
         {
             public const string journal = "Journal/";
 
+            public const string Get = Base + journal + "Get/{enfantId:int}";
 
+            public const string Create = Base + journal + "Create/{enfantId:int}";
 
-            public const string GetAll = Base + journal + "Get/";
-
-            public const string Create = Base + journal + "Create";
-
-            public const string Update = Base + journal + "Update";
+            public const string Update = Base + journal + "Update/{enfantId:int}";
 
             public const string Delete = Base + journal + "Delete/{journalId:int}";
         }

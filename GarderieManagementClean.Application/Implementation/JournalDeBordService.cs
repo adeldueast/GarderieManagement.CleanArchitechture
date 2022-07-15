@@ -30,5 +30,11 @@ namespace GarderieManagementClean.Application.Implementation
             return _journalRepository.updateJournal(userId, journal);
 
         }
+
+        public Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId)
+        {
+            return _journalRepository.getTodayChildsJournal(userId, enfantId);
+
+        }
     }
 }

@@ -4,14 +4,16 @@ using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GarderieManagementClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220715174723_AddePropToJournalDeBordEntity")]
+    partial class AddePropToJournalDeBordEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -266,12 +268,6 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Activite_Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Commentaire_Message")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -280,6 +276,9 @@ namespace GarderieManagementClean.Infrastructure.Migrations
 
                     b.Property<int>("EnfantId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Humeur_Description")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Humeur_Rating")
                         .HasColumnType("int");
@@ -290,14 +289,23 @@ namespace GarderieManagementClean.Infrastructure.Migrations
                     b.Property<string>("LastUpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Manger_Message")
+                    b.Property<string>("Manger_Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Manger_Rating")
                         .HasColumnType("int");
 
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Participation_Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Participation_Rating")
                         .HasColumnType("int");
+
+                    b.Property<string>("Toilette_Description")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Toilette_Rating")
                         .HasColumnType("int");

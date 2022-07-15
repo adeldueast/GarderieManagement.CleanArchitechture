@@ -13,5 +13,8 @@ namespace GarderieManagementClean.Application.Interfaces.Repositories
         public Task<Result<JournalDeBord>> createJournal(string userId,JournalDeBord journal);
 
         public Task<Result<JournalDeBord>> updateJournal(string userId, JournalDeBord journal);
+
+        public Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId);
+
     }
 }

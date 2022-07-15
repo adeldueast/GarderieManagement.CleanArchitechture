@@ -9,23 +9,20 @@ namespace Contracts.Dtos.Request
     public class JournalUpdateRequest
     {
 
-        public int Id { get; set; }
+
 
         public int Humeur_Rating { get; set; }
-        public string Humeur_Description { get; set; }
-
-
         public int Toilette_Rating { get; set; }
-        public string Toilette_Description { get; set; }
-
-
         public int Manger_Rating { get; set; }
-        public string Manger_Description { get; set; }
+        public int Participation_Rating { get; set; }
 
 
-        public string Message { get; set; }
 
-       
+        public string Activite_Message { get; set; }
+        public string Manger_Message { get; set; }
+        public string Commentaire_Message { get; set; }
+
+
 
 
 

@@ -29,13 +29,14 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(Roles = "owner,admin,employee")]
         [HttpPost(ApiRoutes.Journal.Create)]
-        public async Task<IActionResult> createJournal([FromBody] JournalCreateRequest journalCreateRequest)
+        public async Task<IActionResult> createJournal([FromRoute] int enfantId, [FromBody] JournalCreateRequest journalCreateRequest)
         {
             try
             {
                 var userId = HttpContext.GetUserId();
 
                 var journal = _mapper.Map<JournalDeBord>(journalCreateRequest);
+                journal.EnfantId = enfantId;
 
                 var result = await _journalService.createJournal(userId, journal);
 
@@ -57,15 +58,44 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         [Authorize(Roles = "owner,admin,employee")]
         [HttpPost(ApiRoutes.Journal.Update)]
-        public async Task<IActionResult> updateJournal([FromBody] JournalUpdateRequest journalUpdateRequest)
+        public async Task<IActionResult> updateJournal([FromRoute] int enfantId, [FromBody] JournalUpdateRequest journalUpdateRequest)
         {
             try
             {
                 var userId = HttpContext.GetUserId();
 
                 var journal = _mapper.Map<JournalDeBord>(journalUpdateRequest);
-
+                journal.EnfantId = enfantId;
                 var result = await _journalService.updateJournal(userId, journal);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+
+                result.Data = _mapper.Map<JournalResponse>(result.Data);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, e.Message);
+            }
+        }
+
+
+
+        [Authorize(Roles = "owner,admin,employee")]
+        [HttpGet(ApiRoutes.Journal.Get)]
+        public async Task<IActionResult> getTodayChildsJournal([FromRoute] int enfantId)
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+
+
+                var result = await _journalService.getTodayChildsJournal(userId, enfantId);
 
                 if (!result.Success)
                 {

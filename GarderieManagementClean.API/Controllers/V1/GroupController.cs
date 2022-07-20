@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    
+
     [ApiController]
     public class GroupController : ControllerBase
     {
@@ -57,7 +57,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             {
                 return BadRequest(result);
             }
-            result.Data = _mapper.Map<List<GroupResponse>>(result.Data);
+            //  result.Data = _mapper.Map<List<GroupResponse>>(result.Data);
             return Ok(result);
         }
 

@@ -19,6 +19,12 @@ namespace GarderieManagementClean.Application.Implementation
             _enfantRepository = enfantRepository;
         }
 
+        public Task<Result<Enfant>> getAllEnfantsGroupedByGroup(string userId)
+        {
+            return _enfantRepository.getAllEnfantsGroupedByGroup(userId);
+
+        }
+
         public Task<Result<Enfant>> getEnfantById(string userId, int EnfantId)
         {
             return _enfantRepository.getEnfantById(userId, EnfantId);

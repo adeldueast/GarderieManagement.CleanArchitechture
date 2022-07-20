@@ -20,8 +20,6 @@ namespace Contracts.Dtos
         public string Email { get; set; }
 
 
-        public bool EmergencyContact { get; set; }
-        public bool AuthorizePickup { get; set; }
 
         public bool isOnline { get; set; }
 

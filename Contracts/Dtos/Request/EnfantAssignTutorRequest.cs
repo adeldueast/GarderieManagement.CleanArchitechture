@@ -14,6 +14,9 @@ namespace Contracts.Dtos.Request
 
         public string Relation { get; set; }
 
+        public bool EmergencyContact { get; set; }
+        public bool AuthorizePickup { get; set; }
+
 
     }
 }

@@ -254,8 +254,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 Email = inviteUserRequest.Email,
                 UserName = inviteUserRequest.Email,
                 GarderieId = currentUser.GarderieId,
-                EmergencyContact = inviteUserRequest.EmergencyContact,
-                AuthorizePickup = inviteUserRequest.AuthorizePickup,
+
 
             };
 
@@ -280,7 +279,9 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 {
                     ApplicationUser = newUser,
                     Enfant = enfant,
-                    Relation = inviteUserRequest.Relation
+                    Relation = inviteUserRequest.Relation,
+                    EmergencyContact = inviteUserRequest.EmergencyContact,
+                    AuthorizePickup = inviteUserRequest.AuthorizePickup,
                 });
 
 

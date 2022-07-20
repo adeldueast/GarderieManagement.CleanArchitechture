@@ -28,8 +28,7 @@ namespace GarderieManagementClean.Domain.Entities
         public virtual List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
 
 
-        public bool EmergencyContact { get; set; }
-        public bool AuthorizePickup { get; set; }
+
         public bool hasAccount { get; set; } = false;
 
         public bool isOnline { get; set; } = false;

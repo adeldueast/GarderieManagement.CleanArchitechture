@@ -16,7 +16,7 @@ namespace Contracts.Dtos.Response
 
         public string EducatriceFullName { get; set; }
 
-        public List<string> EnfantsIds { get; set; }
+        public List<int> EnfantsIds { get; set; }
 
         public string HexColor { get; set; }
 

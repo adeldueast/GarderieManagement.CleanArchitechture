@@ -1,4 +1,5 @@
-﻿using GarderieManagementClean.Application.Interfaces.Repositories;
+﻿using Contracts.Dtos.Response;
+using GarderieManagementClean.Application.Interfaces.Repositories;
 using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Identity;
@@ -154,7 +155,16 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
             }
 
 
-            var groups = await _context.Groups.Where(g => g.GarderieId == user.GarderieId).ToListAsync();
+            var groups = await _context.Groups.Where(g => g.GarderieId == user.GarderieId)
+                .Select(g => new GroupResponse()
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    HexColor = g.HexColor,
+                    EducatriceFullName = $"{g.ApplicationUser.FirstName} {g.ApplicationUser.LastName}",
+                    EnfantsIds = g.Enfants.Select(g => g.Id).ToList()
+                })
+                .ToListAsync();
 
             return new Result<Group>
             {

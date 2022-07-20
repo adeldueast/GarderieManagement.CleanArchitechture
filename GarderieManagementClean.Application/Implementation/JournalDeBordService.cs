@@ -1,4 +1,5 @@
-﻿using GarderieManagementClean.Application.Interfaces.Repositories;
+﻿using Contracts.Dtos.Request;
+using GarderieManagementClean.Application.Interfaces.Repositories;
 using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Domain.Entities;
@@ -34,6 +35,12 @@ namespace GarderieManagementClean.Application.Implementation
         public Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId)
         {
             return _journalRepository.getTodayChildsJournal(userId, enfantId);
+
+        }
+
+        public Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest)
+        {
+            return _journalRepository.createGroupedJournals(userId, journalGroupedCreateRequest);
 
         }
     }

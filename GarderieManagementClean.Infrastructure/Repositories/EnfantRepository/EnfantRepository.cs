@@ -260,9 +260,9 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 {
                     Id = x.Id,
                     Nom = x.Nom,
-                    hasArrived = x.Attendances.Any(attendance =>
-                    attendance.ArrivedAt.Value.Date == DateTime.Now.Date &&  !attendance.LeftAt.HasValue
-                    )
+                    hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
+                    Group = x.Group.Name
+
                 })
                 .ToListAsync();
 
@@ -353,7 +353,10 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 var relation = await _context.TutorEnfant.SingleOrDefaultAsync(te =>
                 te.ApplicationUserId == tutor.Id &&
                 te.EnfantId == enfant.Id);
+
                 relation.Relation = enfantAssignTutorRequest.Relation;
+                relation.AuthorizePickup = enfantAssignTutorRequest.AuthorizePickup;
+                relation.EmergencyContact = enfantAssignTutorRequest.EmergencyContact;
 
                 // return new Result<Enfant> { Errors = new List<string>() { $"Tutor '{enfantAssignTutorRequest.TutorId}' is already a tutor of '{enfantAssignTutorRequest.EnfantId}'" } };
 
@@ -366,7 +369,10 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     {
                         ApplicationUserId = tutor.Id,
                         EnfantId = enfant.Id,
-                        Relation = enfantAssignTutorRequest.Relation
+                        Relation = enfantAssignTutorRequest.Relation,
+                        AuthorizePickup = enfantAssignTutorRequest.AuthorizePickup,
+                        EmergencyContact = enfantAssignTutorRequest.EmergencyContact
+
                     }
                     );
 
@@ -383,6 +389,43 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 Data = "Assignation successful"
             };
 
+        }
+
+        public async Task<Result<Enfant>> getAllEnfantsGroupedByGroup(string userId)
+        {
+            var user = await getUserById(userId);
+            if (user.GarderieId == null)
+            {
+                return new Result<Enfant>
+                {
+                    Errors = new List<string>() { "User doesnt have a garderie" }
+                };
+            }
+
+            var enfants = (await _context.Enfants
+                .Where(e => e.GarderieId == user.GarderieId).ToListAsync())
+                .GroupBy(e => e.Group != null ? e.Group.Name : "No Group")
+                ;
+
+            //.Select(group =>
+            //    new
+            //    {
+            //        Name = group.Key,
+            //        Children = group.Select(enfant =>
+            //                                new EnfantSummariesResponse()
+            //                                {
+            //                                    Id = enfant.Id,
+            //                                    Nom = enfant.Nom,
+            //                                    hasArrived = enfant.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
+            //                                })
+            //    }).ToList();
+
+
+            return new Result<Enfant>
+            {
+                Success = true,
+                Data = enfants
+            };
         }
     }
 }

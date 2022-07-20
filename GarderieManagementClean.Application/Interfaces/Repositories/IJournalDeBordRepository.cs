@@ -1,4 +1,5 @@
-﻿using GarderieManagementClean.Application.Models;
+﻿using Contracts.Dtos.Request;
+using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,9 @@ namespace GarderieManagementClean.Application.Interfaces.Repositories
         public Task<Result<JournalDeBord>> updateJournal(string userId, JournalDeBord journal);
 
         public Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId);
+
+        public Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest);
+
 
     }
 }

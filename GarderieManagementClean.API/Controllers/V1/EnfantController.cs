@@ -89,6 +89,31 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
         }
 
+        [HttpGet(ApiRoutes.Enfant.GetAllGrouped)]
+        public async Task<IActionResult> getAllEnfantsGroupedByGroup()
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+                var result = await _enfantService.getAllEnfantsGroupedByGroup(userId);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                //   result.Data = _mapper.Map<List<EnfantSummariesResponse>>(result.Data as List<Enfant>);
+                // result.Data = _mapper.Map(da,result.Data as List<Enfant>);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, e.Message);
+            }
+        }
+
 
         [HttpGet(ApiRoutes.Enfant.Get)]
         public async Task<IActionResult> getEnfantById(int enfantId)

@@ -56,6 +56,33 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
         }
 
+
+        [Authorize(Roles = "owner,admin,employee")]
+        [HttpPost(ApiRoutes.Journal.CreateGrouped)]
+        public async Task<IActionResult> createGroupedJournals([FromBody] JournalGroupedCreateRequest journalGroupedCreateRequest)
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+
+                var result = await _journalService.createGroupedJournals(userId, journalGroupedCreateRequest);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, e.Message);
+            }
+        }
+
+
         [Authorize(Roles = "owner,admin,employee")]
         [HttpPost(ApiRoutes.Journal.Update)]
         public async Task<IActionResult> updateJournal([FromRoute] int enfantId, [FromBody] JournalUpdateRequest journalUpdateRequest)

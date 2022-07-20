@@ -23,7 +23,7 @@
             public const string RevokeTokens = Base + Account + "RevokeTokens";
 
             public const string ConfirmEmail = Base + Account + "ConfirmEmail";
-            
+
             public const string ConfirmEmailTest = Base + Account + "ConfirmEmailTEST/{userId}";
 
 
@@ -74,6 +74,9 @@
 
             public const string GetAll = Base + enfant + "GetAll";
 
+            public const string GetAllGrouped = Base + enfant + "GetAllGrouped";
+
+
             public const string Create = Base + enfant + "Create";
 
             public const string Update = Base + enfant + "Update";
@@ -115,6 +118,11 @@
             public const string Get = Base + journal + "Get/{enfantId:int}";
 
             public const string Create = Base + journal + "Create/{enfantId:int}";
+
+            public const string CreateGrouped = Base + journal + "Create";
+
+
+
 
             public const string Update = Base + journal + "Update/{enfantId:int}";
 

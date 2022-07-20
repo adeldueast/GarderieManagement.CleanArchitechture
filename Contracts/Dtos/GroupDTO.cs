@@ -14,6 +14,7 @@ namespace Contracts.Dtos
 
         public string Photo { get; set; }
 
-  
+        public string HexColor { get; set; }
+
     }
 }

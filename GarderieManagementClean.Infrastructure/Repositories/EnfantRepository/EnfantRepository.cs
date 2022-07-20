@@ -261,7 +261,9 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     Id = x.Id,
                     Nom = x.Nom,
                     hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
-                    Group = x.Group.Name
+                    Group = x.Group.Name,
+                    HexColor = x.Group.HexColor
+                    
 
                 })
                 .ToListAsync();

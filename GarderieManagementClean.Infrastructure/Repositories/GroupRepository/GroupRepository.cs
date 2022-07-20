@@ -156,13 +156,16 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
 
 
             var groups = await _context.Groups.Where(g => g.GarderieId == user.GarderieId)
-                .Select(g => new GroupResponse()
+                .Select(g => new 
                 {
                     Id = g.Id,
                     Name = g.Name,
                     HexColor = g.HexColor,
                     EducatriceFullName = $"{g.ApplicationUser.FirstName} {g.ApplicationUser.LastName}",
-                    EnfantsIds = g.Enfants.Select(g => g.Id).ToList()
+                    //list of childs that are actually present (has arrived)
+                    EnfantsIds = g.Enfants.Where(e => e.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue)).Select(x => x.Id).ToList(),
+                    //hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
+
                 })
                 .ToListAsync();
 
@@ -185,7 +188,9 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
                 };
             }
 
-            var group = _context.Groups.SingleOrDefault(g => g.GarderieId == user.GarderieId && g.Id == GroupId);
+            var group = await _context.Groups
+                .SingleOrDefaultAsync(g => g.GarderieId == user.GarderieId && g.Id == GroupId);
+
 
             if (group is null)
             {
@@ -195,6 +200,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
                 };
             }
 
+         
             return new Result<Group>
             {
                 Success = true,

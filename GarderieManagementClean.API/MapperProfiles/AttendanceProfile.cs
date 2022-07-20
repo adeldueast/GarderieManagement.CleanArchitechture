@@ -14,7 +14,7 @@ namespace GarderieManagementClean.API.MapperProfiles
             //AbsenceDescription = a.AbsenceDescription,
             CreateMap<Attendance, AttendanceResponse>()
                 .ForMember(dest => dest.Present,
-                    opt => opt.MapFrom(src => src.ArrivedAt.HasValue ? true : false))
+                    opt => opt.MapFrom(src => (src.ArrivedAt != null && src.LeftAt == null) ? true : false))
                 .ForMember(dest => dest.Date,
                     opt => opt.MapFrom(src => src.ArrivedAt.HasValue ? src.ArrivedAt.Value : src.AbsenceDate.Value));
 

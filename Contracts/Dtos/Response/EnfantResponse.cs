@@ -24,6 +24,8 @@ namespace Contracts.Dtos.Response
 
         public GroupDTO Group { get; set; }
 
-      
+
+
+
     }
 }

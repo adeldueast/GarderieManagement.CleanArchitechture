@@ -60,6 +60,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             var attendance = await _context.Attendances.SingleOrDefaultAsync(attendance =>
             attendance.EnfantId == enfant.Id &&
             (
+
             attendance.ArrivedAt.Value.Date == DateTime.Now.Date ||
             attendance.AbsenceDate.Value.Date == DateTime.Now.Date
             )

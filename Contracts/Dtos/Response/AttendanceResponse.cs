@@ -10,6 +10,9 @@ namespace Contracts.Dtos.Response
     {
         public int Id { get; set; }
 
+        public int EnfantId { get; set; }
+
+
         public bool Present { get; set; }
 
         public DateTime Date { get; set; }

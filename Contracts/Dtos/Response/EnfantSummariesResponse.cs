@@ -17,5 +17,8 @@ namespace Contracts.Dtos.Response
         public bool hasArrived { get; set; }
 
         public string Group { get; set; }
+
+        public string HexColor { get; set; }
+
     }
 }

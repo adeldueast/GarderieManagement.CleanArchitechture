@@ -14,6 +14,7 @@ using GarderieManagementClean.Infrastructure.Repositories.AttendanceRepository;
 using GarderieManagementClean.Infrastructure.Repositories.EnfantRepository;
 using GarderieManagementClean.Infrastructure.Repositories.GroupRepository;
 using GarderieManagementClean.Infrastructure.Repositories.JournalRepository;
+using GarderieManagementClean.Infrastructure.Repositories.NotificationRepository;
 using GarderieManagementClean.Infrastructure.Repositories.UserRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -183,6 +184,11 @@ namespace GarderieManagementClean.API.Extensions
             //users  service/repository
             services.AddScoped<IJournalDeBordService, JournalDeBordService>();
             services.AddScoped<IJournalDeBordRepository, JournalRepository>();
+
+
+            //users  service/repository
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
 
             //enfant  service/repository
             //services.AddScoped<IAttendanceService, AttendanceService>();

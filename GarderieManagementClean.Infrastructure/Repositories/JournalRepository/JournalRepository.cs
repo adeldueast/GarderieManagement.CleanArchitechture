@@ -1,5 +1,6 @@
 ﻿using Contracts.Dtos.Request;
 using GarderieManagementClean.Application.Interfaces.Repositories;
+using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Persistence;
@@ -18,11 +19,13 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly INotificationService _notificationService;
 
-        public JournalRepository(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public JournalRepository(UserManager<ApplicationUser> userManager, ApplicationDbContext context, INotificationService notificationService)
         {
             _userManager = userManager;
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest)
@@ -78,7 +81,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
                 existingJournal.Manger_Message = journalGroupedCreateRequest.Manger_Message;
             }
 
-         
+
 
             await _context.SaveChangesAsync();
 
@@ -125,6 +128,20 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
             _context.Add(newJournal);
             await _context.SaveChangesAsync();
+
+            //After Creating a journal, we also create a notification 
+
+            var tutors = enfant.Tutors.Select(t => t.ApplicationUser);
+            Notification notification = new Notification
+            {
+                CreatedAt = DateTime.Now.Date,
+                ApplicationUsers = new List<ApplicationUser>(tutors),
+                NotificationType = NotificationTypes.Journal,
+                Message = $"New journal disponible for {enfant.Nom}",
+
+            };
+            await _notificationService.createNotification(notification);
+
 
             return new Result<JournalDeBord>()
             {
@@ -207,6 +224,20 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
             _context.Update(existingJournal);
             await _context.SaveChangesAsync();
+
+
+            //After Creating a journal, we also create a notification 
+            var enfant = existingJournal.Enfant;
+            var tutors = enfant.Tutors.Select(t => t.ApplicationUser);
+            Notification notification = new Notification
+            {
+                CreatedAt = DateTime.Now.Date,
+                ApplicationUsers = new List<ApplicationUser>(tutors),
+                NotificationType = NotificationTypes.Journal,
+                Message = $"Journal of {enfant.Nom} modified",
+
+            };
+            await _notificationService.createNotification(notification);
 
             return new Result<JournalDeBord>()
             {

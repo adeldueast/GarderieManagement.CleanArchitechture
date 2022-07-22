@@ -27,7 +27,7 @@ namespace GarderieManagementClean.Domain.Entities
 
         public virtual List<TutorEnfant> Tutors { get; set; } = new List<TutorEnfant>();
 
-
+        public virtual List<Notification> Notifications { get; set; }
 
         public bool hasAccount { get; set; } 
 

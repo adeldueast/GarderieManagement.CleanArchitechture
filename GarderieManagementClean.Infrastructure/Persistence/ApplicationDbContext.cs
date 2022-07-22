@@ -28,6 +28,8 @@ namespace GarderieManagementClean.Infrastructure.Persistence
 
 
         public DbSet<TutorEnfant> TutorEnfant { get; set; }
+
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -26,7 +26,7 @@ namespace GarderieManagementClean.API.HubConfig
         }
         public override async Task<Task> OnConnectedAsync()
         {
-
+          
             getUserInfoFromToken(out string userId, out string email, out string garderieId);
 
             var user = await _context.Users.SingleAsync(x => x.Id == userId);

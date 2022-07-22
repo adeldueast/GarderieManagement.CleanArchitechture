@@ -129,6 +129,18 @@
             public const string Delete = Base + journal + "Delete/{journalId:int}";
         }
 
+        public static class Notification
+        {
+            public const string notification = "Notification/";
+
+            public const string Get = Base + notification + "Get";
+
+            public const string Create = Base + notification + "Create";
+
+            public const string Update = Base + notification + "Update";
+
+            public const string Delete = Base + notification + "Delete";
+        }
 
     }
 }

@@ -255,13 +255,14 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 UserName = inviteUserRequest.Email,
                 GarderieId = currentUser.GarderieId,
 
+                hasAccount = inviteUserRequest.HasAnAccount ? true : false
 
             };
 
 
             //TODO: implement a email invitation to choose their own password
-            //Create new password-less User
-            var createdUser = await _userManager.CreateAsync(newUser, "password");
+
+            var createdUser = await _userManager.CreateAsync(newUser, inviteUserRequest.HasAnAccount ? "password" : Guid.NewGuid().ToString());
             if (!createdUser.Succeeded)
             {
                 return new Result<object>

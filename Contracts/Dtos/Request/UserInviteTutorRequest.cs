@@ -21,6 +21,8 @@ namespace Contracts.Dtos.Request
         public bool EmergencyContact { get; set; }
         public bool AuthorizePickup { get; set; }
 
-       
+        public bool HasAnAccount { get; set; } 
+
+
     }
 }

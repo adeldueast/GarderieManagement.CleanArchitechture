@@ -20,6 +20,7 @@ namespace Contracts.Dtos
         public string Email { get; set; }
 
 
+        public bool hasAccount { get; set; }
 
         public bool isOnline { get; set; }
 

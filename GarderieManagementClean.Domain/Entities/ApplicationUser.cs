@@ -29,7 +29,7 @@ namespace GarderieManagementClean.Domain.Entities
 
 
 
-        public bool hasAccount { get; set; } = false;
+        public bool hasAccount { get; set; } 
 
         public bool isOnline { get; set; } = false;
 

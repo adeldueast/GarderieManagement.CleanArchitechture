@@ -119,7 +119,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
             }
 
 
-            var group = _context.Groups.SingleOrDefault(g => g.GarderieId == (int)user.GarderieId && g.Id == GroupId);
+            var group = _context.Groups.Include(g=>g.Enfants).SingleOrDefault(g => g.GarderieId == (int)user.GarderieId && g.Id == GroupId);
 
             if (group == null)
             {

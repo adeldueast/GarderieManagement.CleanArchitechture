@@ -56,5 +56,10 @@ namespace GarderieManagementClean.Application.Implementation
             return _enfantRepository.assignTutorToEnfant(userId, enfantAssignTutorRequest);
 
         }
+
+        public Task<Result<Enfant>> getAllTutorsEnfants(string userId)
+        {
+            return _enfantRepository.getAllTutorsEnfants(userId);
+        }
     }
 }

@@ -134,7 +134,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
             var tutors = enfant.Tutors.Select(t => t.ApplicationUser);
             Notification notification = new Notification
             {
-                CreatedAt = DateTime.Now.Date,
+                CreatedAt = DateTime.Now,
                 ApplicationUsers = new List<ApplicationUser>(tutors),
                 NotificationType = NotificationTypes.Journal,
                 Message = $"New journal disponible for {enfant.Nom}",
@@ -231,10 +231,10 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
             var tutors = enfant.Tutors.Select(t => t.ApplicationUser);
             Notification notification = new Notification
             {
-                CreatedAt = DateTime.Now.Date,
+                CreatedAt = DateTime.Now,
                 ApplicationUsers = new List<ApplicationUser>(tutors),
                 NotificationType = NotificationTypes.Journal,
-                Message = $"Journal of {enfant.Nom} modified",
+                Message = $"Journal of {enfant.Nom.Split(' ')[0]} modified",
 
             };
             await _notificationService.createNotification(notification);

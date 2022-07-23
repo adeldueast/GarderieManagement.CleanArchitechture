@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿    using AutoMapper;
 using Contracts.Dtos.Request;
 using Contracts.Dtos.Response;
 using Contracts.Response;
@@ -45,7 +45,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(Roles = "owner,admin,employee")]
+        [Authorize(Roles = "owner,admin,employeem,tutor")]
         [HttpGet(ApiRoutes.Group.GetAll)]
         public async Task<IActionResult> getAllGroups()
         {

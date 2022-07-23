@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    [Authorize(Roles = "owner,admin,employee")]
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class AttendanciesController : ControllerBase
@@ -39,7 +39,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpPost("Arrived/{enfantId}")]
         public async Task<IActionResult> Arrived([FromRoute] int enfantId)
         {
@@ -74,7 +74,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             if (attendance != null)
             {
 
-             
+
 
 
                 attendance.ArrivedAt = DateTime.Now;
@@ -116,6 +116,8 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
+
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpPost("Left/{enfantId}")]
         public async Task<IActionResult> Left([FromRoute] int enfantId)
         {
@@ -146,7 +148,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
-
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpPost("Absent/{enfantId}")]
         public async Task<IActionResult> createAbsence([FromBody] AttendanceCreateAbsenceRequest attendanceCreateAbsenceRequest)
         {
@@ -157,7 +159,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             var attendance = await _context.Attendances.SingleOrDefaultAsync(attendance =>
                 attendance.EnfantId == enfant.Id &&
-                ( attendance.AbsenceDate.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date ||attendance.ArrivedAt.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date)
+                (attendance.AbsenceDate.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date || attendance.ArrivedAt.Value.Date == attendanceCreateAbsenceRequest.AbsenceDate.Date)
                 );
 
             //If attendance exists
@@ -200,16 +202,27 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
-
+        [Authorize(Roles = "owner,admin,employee,tutor")]
         [HttpGet("{enfantId}")]
         public async Task<IActionResult> getChildsAttendances([FromRoute] int enfantId)
         {
             var userId = HttpContext.GetUserId();
             var user = await _userManager.FindByIdAsync(userId);
-            var enfant = _context.Enfants.AsNoTracking().SingleOrDefault(e =>
-            e.Id == enfantId &&
-            e.GarderieId == user.GarderieId
-            );
+
+            Enfant enfant = null;
+            if (await _userManager.IsInRoleAsync(user, "tutor"))
+            {
+                enfant = _context.Enfants.AsNoTracking().SingleOrDefault(e =>
+         e.Id == enfantId &&
+         e.GarderieId == user.GarderieId &&
+         e.Tutors.Select(te => te.ApplicationUser).Contains(user)
+         );
+            }
+            enfant = _context.Enfants.AsNoTracking().SingleOrDefault(e =>
+           e.Id == enfantId &&
+           e.GarderieId == user.GarderieId
+           );
+
             if (enfant == null) return NotFound($"Enfant '{enfantId}' does not exist");
 
 

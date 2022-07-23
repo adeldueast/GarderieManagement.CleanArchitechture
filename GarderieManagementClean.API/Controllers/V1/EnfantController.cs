@@ -12,12 +12,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
 
-    [Authorize(Roles = "owner,admin,employee")]
+    [Authorize]
     [ApiController]
     public class EnfantController : ControllerBase
     {
@@ -63,7 +64,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
         }
 
-
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpGet(ApiRoutes.Enfant.GetAll)]
         public async Task<IActionResult> getAllEnfants()
         {
@@ -89,6 +90,35 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
         }
 
+
+        [Authorize(Roles = "tutor")]
+
+        [HttpGet(ApiRoutes.Enfant.GetAllTutorsChilds)]
+        public async Task<IActionResult> getAllTutorsChilds()
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+                var result = await _enfantService.getAllTutorsEnfants(userId);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                //   result.Data = _mapper.Map<List<EnfantSummariesResponse>>(result.Data as List<Enfant>);
+                // result.Data = _mapper.Map(da,result.Data as List<Enfant>);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, e.Message);
+            }
+        }
+
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpGet(ApiRoutes.Enfant.GetAllGrouped)]
         public async Task<IActionResult> getAllEnfantsGroupedByGroup()
         {
@@ -114,17 +144,21 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
         }
 
-
+        [Authorize(Roles = "owner,admin,employee,tutor")]
         [HttpGet(ApiRoutes.Enfant.Get)]
         public async Task<IActionResult> getEnfantById(int enfantId)
         {
+
             try
             {
+
                 var userId = HttpContext.GetUserId();
+
                 var result = await _enfantService.getEnfantById(userId, enfantId);
 
                 if (!result.Success)
-                {
+                {   
+
                     return BadRequest(result);
                 }
                 result.Data = _mapper.Map<EnfantResponse>(result.Data);
@@ -136,6 +170,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                 return StatusCode(500, e.Message);
             }
         }
+
+
 
         [Authorize(Roles = "owner,admin")]
         [HttpPost(ApiRoutes.Enfant.Update)]

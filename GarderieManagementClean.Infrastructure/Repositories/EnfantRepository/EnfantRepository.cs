@@ -263,7 +263,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
                     Group = x.Group.Name,
                     HexColor = x.Group.HexColor
-                    
+
 
                 })
                 .ToListAsync();
@@ -279,6 +279,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
         public async Task<Result<Enfant>> getEnfantById(string userId, int EnfantId)
         {
             var user = await getUserById(userId);
+
             if (user == null)
             {
                 return new Result<Enfant>
@@ -294,7 +295,26 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 };
             }
 
-            var enfant = await _context.Enfants.FirstOrDefaultAsync(x => x.GarderieId == user.GarderieId && x.Id == EnfantId);
+            Enfant enfant = null;
+            if (await _userManager.IsInRoleAsync(user, "tutor"))
+            {
+                enfant = await _context.Enfants
+                    .FirstOrDefaultAsync(x =>
+                    x.GarderieId == user.GarderieId &&
+                    x.Id == EnfantId &&
+                    x.Tutors.Select(te => te.ApplicationUser).Contains(user)
+                    );
+
+              
+
+
+            }
+            else
+            {
+                enfant = await _context.Enfants.FirstOrDefaultAsync(x => x.GarderieId == user.GarderieId && x.Id == EnfantId);
+
+            }
+
             if (enfant is null)
             {
                 return new Result<Enfant>
@@ -421,6 +441,39 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
             //                                    hasArrived = enfant.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
             //                                })
             //    }).ToList();
+
+
+            return new Result<Enfant>
+            {
+                Success = true,
+                Data = enfants
+            };
+        }
+
+        public async Task<Result<Enfant>> getAllTutorsEnfants(string userId)
+        {
+
+            var user = await getUserById(userId);
+            if (user.GarderieId == null)
+            {
+                return new Result<Enfant>
+                {
+                    Errors = new List<string>() { "User doesnt have a garderie" }
+                };
+            }
+
+            var enfants = await _context.Enfants
+                .Where(x => x.GarderieId == user.GarderieId && x.Tutors.Select(te => te.ApplicationUser).Contains(user))
+                .Select(x => new EnfantSummariesResponse()
+                {
+                    Id = x.Id,
+                    Nom = x.Nom,
+                    hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
+                    Group = x.Group.Name,
+                    HexColor = x.Group.HexColor
+
+                })
+                .ToListAsync();
 
 
             return new Result<Enfant>

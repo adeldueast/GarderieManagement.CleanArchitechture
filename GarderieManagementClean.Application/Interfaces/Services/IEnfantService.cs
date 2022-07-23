@@ -14,6 +14,9 @@ namespace GarderieManagementClean.Application.Interfaces.Services
         public Task<Result<Enfant>> getEnfantById(string userId, int EnfantId);
         public Task<Result<Enfant>> getAllEnfants(string userId);
 
+        public Task<Result<Enfant>> getAllTutorsEnfants(string userId);
+
+
         public Task<Result<Enfant>> getAllEnfantsGroupedByGroup(string userId);
 
         public Task<Result<Enfant>> createEnfant(string userId, EnfantCreateRequest newEnfant);

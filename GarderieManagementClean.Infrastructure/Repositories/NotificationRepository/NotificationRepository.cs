@@ -43,7 +43,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.NotificationReposi
 
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
 
-            var notifs = await _context.Notifications.Where(n => n.ApplicationUsers.Contains(user)).OrderBy(n => n.Seen == false).Select(n => new NotificationsResponse()
+            var notifs = await _context.Notifications.Where(n => n.ApplicationUsers.Contains(user)).OrderBy(n => n.Seen == true).Select(n => new NotificationsResponse()
             {
                 CreatedAt = n.CreatedAt,
                 Id = n.Id,

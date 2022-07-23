@@ -74,6 +74,9 @@
 
             public const string GetAll = Base + enfant + "GetAll";
 
+            public const string GetAllTutorsChilds = Base + enfant + "GetAllTutorsChilds";
+
+
             public const string GetAllGrouped = Base + enfant + "GetAllGrouped";
 
 

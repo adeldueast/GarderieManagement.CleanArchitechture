@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    
+
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -72,7 +72,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [Authorize(Roles = "owner,admin,employee")]
+        [Authorize(Roles = "owner,admin,employee,tutor")]
         [HttpGet(ApiRoutes.User.GetAllTutors)]
         public async Task<IActionResult> getAllTutors()
         {
@@ -94,14 +94,15 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
-        [Authorize(Roles = "owner,admin,employee")]
+        //TODO: added tutor, so check security
+        [Authorize(Roles = "owner,admin,employee,tutor")]
         [HttpGet(ApiRoutes.User.GetAllChildsTutors)]
         public async Task<IActionResult> getAllChildsTutors(int enfantId)
         {
             try
             {
                 var userId = HttpContext.GetUserId();
-                var result = await _userService.getAllChildsTutors(userId,enfantId);
+                var result = await _userService.getAllChildsTutors(userId, enfantId);
                 if (!result.Success)
                 {
                     return BadRequest(result);

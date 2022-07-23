@@ -12,6 +12,19 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.HubConfig
 {
+
+    public class CustomUserIdProvider : IUserIdProvider
+    {
+        public virtual string GetUserId(HubConnectionContext connection)
+        {
+
+
+            var userId = connection.User.Claims.Single(x => x.Type == "Id").Value;
+
+            return userId;
+        }
+    }
+
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ChildrenHub : Hub
     {
@@ -20,13 +33,10 @@ namespace GarderieManagementClean.API.HubConfig
         {
             _context = context;
         }
-        public string GetConnectionId()
-        {
-            return Context.ConnectionId;
-        }
+
         public override async Task<Task> OnConnectedAsync()
         {
-          
+
             getUserInfoFromToken(out string userId, out string email, out string garderieId);
 
             var user = await _context.Users.SingleAsync(x => x.Id == userId);
@@ -35,6 +45,7 @@ namespace GarderieManagementClean.API.HubConfig
 
             await Groups.AddToGroupAsync(Context.ConnectionId, garderieId);
             await Clients.GroupExcept(garderieId, Context.ConnectionId).SendAsync("notifyUserStatusChanges", $"User {email} is online in garderie {garderieId}");
+
 
             Debug.WriteLine($"User {user.Email} reconnected to group {garderieId}");
 

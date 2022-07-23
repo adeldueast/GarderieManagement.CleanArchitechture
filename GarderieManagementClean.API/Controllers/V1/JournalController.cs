@@ -2,12 +2,14 @@
 using Contracts.Dtos.Request;
 using Contracts.Dtos.Response;
 using GarderieManagementClean.API.Extensions;
+using GarderieManagementClean.API.HubConfig;
 using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Threading.Tasks;
 
@@ -20,10 +22,13 @@ namespace GarderieManagementClean.API.Controllers.V1
     {
         private readonly IJournalDeBordService _journalService;
         private readonly IMapper _mapper;
-        public JournalController(IJournalDeBordService journalService, IMapper mapper)
+        private readonly IHubContext<ChildrenHub> _hubContext;
+
+        public JournalController(IJournalDeBordService journalService, IMapper mapper, IHubContext<ChildrenHub> hubContext)
         {
             _journalService = journalService;
             _mapper = mapper;
+            _hubContext = hubContext;
         }
 
 
@@ -100,8 +105,10 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(result);
                 }
 
+               await _hubContext.Clients.User(userId).SendAsync("ReceiveMessage", $"IT IS WORKING WOHOOO😁👿");
 
                 result.Data = _mapper.Map<JournalResponse>(result.Data);
+            
                 return Ok(result);
             }
             catch (Exception e)

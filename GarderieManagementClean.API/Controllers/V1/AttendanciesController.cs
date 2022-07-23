@@ -85,7 +85,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                 var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
 
                 Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId2);
-                await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId2).SendAsync("childAttendanceUpdate", dto_attendance1);
+                 await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId2).SendAsync("childAttendanceUpdate", dto_attendance1);
+               // await _hubContext.Clients.User(userId).SendAsync("childAttendanceUpdate", $"ITS WORKING WOHOO");
 
 
                 return Ok(dto_attendance1);

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin,employee")]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner,admin,employee")]
 
     [ApiController]
     public class JournalController : ControllerBase
@@ -113,7 +113,9 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [Authorize(Roles = "owner,admin,employee")]
+        //TODO: added tutor as authorize, so securise the request in the repo if requester is a tutor, check if he has access to child journal
+
+        [Authorize(Roles = "owner,admin,employee,tutor")]
         [HttpGet(ApiRoutes.Journal.Get)]
         public async Task<IActionResult> getTodayChildsJournal([FromRoute] int enfantId)
         {
@@ -123,6 +125,35 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
                 var result = await _journalService.getTodayChildsJournal(userId, enfantId);
+
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+
+                result.Data = _mapper.Map<JournalResponse>(result.Data);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, e.Message);
+            }
+        }
+
+        //TODO: added tutor as authorize, so securise the request in the repo if requester is a tutor, check if he has access to child journal
+
+        [Authorize(Roles = "owner,admin,employee,tutor")]
+        [HttpGet(ApiRoutes.Journal.GetById)]
+        public async Task<IActionResult> getJournalById([FromRoute] int journalId)
+        {
+            try
+            {
+                var userId = HttpContext.GetUserId();
+
+
+                var result = await _journalService.getJournalById(userId, journalId);
 
                 if (!result.Success)
                 {

@@ -137,7 +137,8 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
                 CreatedAt = DateTime.Now,
                 ApplicationUsers = new List<ApplicationUser>(tutors),
                 NotificationType = NotificationTypes.Journal,
-                Message = $"New journal disponible for {enfant.Nom}",
+                DataId = newJournal.Id,
+                Message = $"New journal for {enfant.Nom.Split(' ')[0]}",
 
             };
             await _notificationService.createNotification(notification);
@@ -154,6 +155,48 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
 
 
+        }
+
+        //todo validate security checks if user requesting is a tutor , make sure the journal is one of his children
+        public async Task<Result<JournalDeBord>> getJournalById(string userId, int journalId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            JournalDeBord existingJournal = null;
+            if (await _userManager.IsInRoleAsync(user, "tutor"))
+            {
+                existingJournal = _context.JournalDeBords.SingleOrDefault(j =>
+              j.Id == journalId &&
+              j.Enfant.Tutors.Select(te => te.ApplicationUser).Contains(user)
+                );
+                if (existingJournal == null)
+                {
+                    return new Result<JournalDeBord>()
+                    {
+                        Errors = new string[] { $"Journal '{journalId}' doesnt exist" }
+                    };
+                }
+            }
+
+
+            existingJournal = _context.JournalDeBords.SingleOrDefault(j =>
+               j.Id == journalId &&
+               j.Enfant.GarderieId == user.GarderieId
+           );
+
+            if (existingJournal == null)
+            {
+                return new Result<JournalDeBord>()
+                {
+                    Errors = new string[] { $"Journal '{journalId}' doesnt exist" }
+                };
+            }
+            return new Result<JournalDeBord>()
+            {
+                Success = true,
+                Data = existingJournal,
+
+            };
         }
 
         public async Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId)
@@ -234,6 +277,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
                 CreatedAt = DateTime.Now,
                 ApplicationUsers = new List<ApplicationUser>(tutors),
                 NotificationType = NotificationTypes.Journal,
+                DataId = existingJournal.Id,
                 Message = $"Journal of {enfant.Nom.Split(' ')[0]} modified",
 
             };

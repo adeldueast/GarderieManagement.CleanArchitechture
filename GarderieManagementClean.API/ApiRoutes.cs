@@ -120,6 +120,9 @@
 
             public const string Get = Base + journal + "Get/{enfantId:int}";
 
+            public const string GetById = Base + journal + "GetById/{journalId:int}";
+
+
             public const string Create = Base + journal + "Create/{enfantId:int}";
 
             public const string CreateGrouped = Base + journal + "Create";
@@ -140,7 +143,10 @@
 
             public const string Create = Base + notification + "Create";
 
-            public const string Update = Base + notification + "Update";
+            public const string MarkSeen = Base + notification + "MarkSeen/{notificationId:int}";
+
+            public const string MarkAllSeen = Base + notification + "MarkAllSeen";
+
 
             public const string Delete = Base + notification + "Delete";
         }

@@ -27,6 +27,8 @@ namespace Contracts.Dtos.Response
 
         public int EnfantId { get; set; }
 
+        public string EnfantName { get; set; }
+
 
         public string CreatedBy { get; set; }
 

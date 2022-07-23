@@ -19,6 +19,7 @@ namespace GarderieManagementClean.Application.Interfaces.Repositories
 
         public Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest);
 
+        public Task<Result<JournalDeBord>> getJournalById(string userId, int journalId);
 
     }
 }

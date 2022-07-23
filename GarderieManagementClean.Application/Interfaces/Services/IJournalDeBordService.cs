@@ -18,6 +18,8 @@ namespace GarderieManagementClean.Application.Interfaces.Services
         public Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId);
 
 
+        public Task<Result<JournalDeBord>> getJournalById(string userId, int journalId);
+
         public Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest);
 
 

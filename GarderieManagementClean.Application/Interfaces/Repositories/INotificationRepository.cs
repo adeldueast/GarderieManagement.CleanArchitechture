@@ -14,7 +14,14 @@ namespace GarderieManagementClean.Application.Interfaces.Repositories
         public Task<IEnumerable<NotificationsResponse>> getAllNotification(string userId);
 
         public Task createNotification(Notification notification);
+        public Task deleteNotification(string userId, int notificationId);
 
-        public Task deleteNotification(int notificationId);
+        public Task deleteAllNotification(string userId);
+
+
+        public Task markNotificationSeen(string userId, int notificationId);
+
+        public Task markAllNotificationSeen(string userId);
+
     }
 }

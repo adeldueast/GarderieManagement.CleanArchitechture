@@ -15,7 +15,7 @@ namespace GarderieManagementClean.Application.Implementation
 
         private readonly INotificationRepository _notificationService;
 
-       // public IEnfantRepository _enfantRepository { get; }
+        // public IEnfantRepository _enfantRepository { get; }
         public NotificationService(INotificationRepository notificationRepository)
         {
             _notificationService = notificationRepository;
@@ -27,16 +27,29 @@ namespace GarderieManagementClean.Application.Implementation
             return _notificationService.createNotification(notification);
         }
 
-        public Task deleteNotification(int notificationId)
+        public async Task deleteAllNotification(string userId)
         {
-            return _notificationService.deleteNotification(notificationId);
+            await _notificationService.deleteAllNotification(userId);
+        }
+
+        public async Task deleteNotification(string userId, int notificationId)
+        {
+             await _notificationService.deleteNotification(userId, notificationId);
         }
 
         public async Task<IEnumerable<NotificationsResponse>> getAllNotification(string userId)
         {
-            return await _notificationService.getAllNotification( userId);
+            return await _notificationService.getAllNotification(userId);
         }
 
+        public async Task markAllNotificationSeen(string userId)
+        {
+            await _notificationService.markAllNotificationSeen(userId);
+        }
 
+        public async Task markNotificationSeen(string userId, int notificationId)
+        {
+            await _notificationService.markNotificationSeen(userId, notificationId);
+        }
     }
 }

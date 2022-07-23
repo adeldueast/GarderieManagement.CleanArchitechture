@@ -19,28 +19,34 @@ namespace GarderieManagementClean.Application.Implementation
         {
             _journalRepository = journalDeBordRepository;
         }
-        public Task<Result<JournalDeBord>> createJournal(string userId, JournalDeBord journal)
+        public async Task<Result<JournalDeBord>> createJournal(string userId, JournalDeBord journal)
         {
 
-            return _journalRepository.createJournal(userId, journal);
-           // throw new NotImplementedException();
+            return await _journalRepository.createJournal(userId, journal);
+            // throw new NotImplementedException();
         }
 
-        public Task<Result<JournalDeBord>> updateJournal(string userId, JournalDeBord journal)
+        public async Task<Result<JournalDeBord>> updateJournal(string userId, JournalDeBord journal)
         {
-            return _journalRepository.updateJournal(userId, journal);
-
-        }
-
-        public Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId)
-        {
-            return _journalRepository.getTodayChildsJournal(userId, enfantId);
+            return await _journalRepository.updateJournal(userId, journal);
 
         }
 
-        public Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest)
+        public async Task<Result<JournalDeBord>> getTodayChildsJournal(string userId, int enfantId)
         {
-            return _journalRepository.createGroupedJournals(userId, journalGroupedCreateRequest);
+            return await _journalRepository.getTodayChildsJournal(userId, enfantId);
+
+        }
+
+        public async Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest)
+        {
+            return await _journalRepository.createGroupedJournals(userId, journalGroupedCreateRequest);
+
+        }
+
+        public async Task<Result<JournalDeBord>> getJournalById(string userId, int journalId)
+        {
+            return await _journalRepository.getJournalById(userId, journalId);
 
         }
     }

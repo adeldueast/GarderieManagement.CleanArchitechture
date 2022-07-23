@@ -15,7 +15,9 @@ namespace GarderieManagementClean.API.MapperProfiles
             CreateMap<JournalUpdateRequest, JournalDeBord>();
 
             CreateMap<JournalDeBord, JournalResponse>()
-                .ForMember(dest => dest.CreatedBy, opt=> opt.MapFrom(src=>src.ApplicationUser.Email));
+                .ForMember(dest => dest.CreatedBy, opt => opt.MapFrom(src => src.ApplicationUser.Email))
+                .ForMember(dest => dest.EnfantName, opt => opt.MapFrom(src => src.Enfant.Nom));
+
 
         }
     }

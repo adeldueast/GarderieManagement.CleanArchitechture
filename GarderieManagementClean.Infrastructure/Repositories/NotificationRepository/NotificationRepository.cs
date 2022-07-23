@@ -20,17 +20,48 @@ namespace GarderieManagementClean.Infrastructure.Repositories.NotificationReposi
         {
             _context = context;
         }
+
+        public async Task<IEnumerable<NotificationsResponse>> getAllNotification(string userId)
+        {
+
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
+
+            var notifs = await _context.Notifications.Where(n => n.ApplicationUsers.Contains(user))
+                .OrderByDescending(n => n.CreatedAt)
+                .Select(n => new NotificationsResponse()
+                {
+                    CreatedAt = n.CreatedAt,
+                    Id = n.Id,
+                    Message = n.Message,
+                    NotificationType = n.NotificationType,
+                    DataId = n.DataId,
+                    Seen = n.Seen
+                }).ToListAsync();
+
+            return notifs;
+        }
         public async Task createNotification(Notification notification)
         {
             _context.Add(notification);
             await _context.SaveChangesAsync();
         }
 
-        public async Task deleteNotification(int notificationId)
+        public async Task deleteAllNotification(string userId)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Id == userId);
+
+            var notifs = await _context.Notifications.Where(n => n.ApplicationUsers.Contains(user)).ToListAsync();
+
+            _context.RemoveRange(notifs);
+            await _context.SaveChangesAsync();
+
+        }
+
+        public async Task deleteNotification(string userId, int notificationId)
         {
 
-            var notif = _context.Notifications.SingleOrDefault(n => n.Id == notificationId);
-
+            var user = _context.Users.SingleOrDefault(u => u.Id == userId);
+            var notif = await _context.Notifications.SingleOrDefaultAsync(n => n.Id == notificationId && n.ApplicationUsers.Contains(user));
             if (notif != null)
             {
                 _context.Remove(notif);
@@ -38,21 +69,29 @@ namespace GarderieManagementClean.Infrastructure.Repositories.NotificationReposi
             }
         }
 
-        public async Task<IEnumerable<NotificationsResponse>> getAllNotification(string userId)
+        public async Task markAllNotificationSeen(string userId)
         {
-
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
 
-            var notifs = await _context.Notifications.Where(n => n.ApplicationUsers.Contains(user)).OrderBy(n => n.Seen == true).Select(n => new NotificationsResponse()
+            var notifs = await _context.Notifications.Where(n => n.ApplicationUsers.Contains(user)).ToListAsync();
+            foreach (var notif in notifs)
             {
-                CreatedAt = n.CreatedAt,
-                Id = n.Id,
-                Message = n.Message,
-                NotificationType = n.NotificationType,
-                Seen = n.Seen
-            }).ToListAsync();
+                notif.Seen = true;
 
-            return notifs;
+            }
+            await _context.SaveChangesAsync();
+
+
+        }
+
+        public async Task markNotificationSeen(string userId, int notificationId)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
+
+            var notif = await _context.Notifications.SingleOrDefaultAsync(n => n.Id == notificationId && n.ApplicationUsers.Contains(user));
+
+            notif.Seen = true;
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-      
+
         [HttpGet(ApiRoutes.Notification.Get)]
 
         public async Task<IActionResult> Get()
@@ -35,13 +35,22 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        //// DELETE api/<NotificationController>/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int notificationId)
-        //{
-        //    await _notificationService.deleteNotification(notificationId);
-        //    return Ok();
-        //}
+     
+        [HttpPost(ApiRoutes.Notification.MarkSeen)]
+        public async Task<IActionResult> markNotificationSeen(int notificationId)
+        {
+            var userId = HttpContext.GetUserId();
+            await _notificationService.markNotificationSeen(userId, notificationId);
+            return Ok();
+        }
+
+        [HttpPost(ApiRoutes.Notification.MarkAllSeen)]
+        public async Task<IActionResult> markAllNotificationSeen()
+        {
+            var userId = HttpContext.GetUserId();
+            await _notificationService.markAllNotificationSeen(userId);
+            return Ok();
+        }
 
 
         //// GET api/<NotificationController>/5

@@ -20,7 +20,10 @@ namespace Contracts.Dtos.Response
         public NotificationTypes NotificationType { get; set; }
 
         //When user clicks on notification, we can redirect him to journal or photo depending on the type of notif
-        //public int DataId { get; set; }
+        public int DataId { get; set; }
+ 
+
+
 
         public string Message { get; set; }
 

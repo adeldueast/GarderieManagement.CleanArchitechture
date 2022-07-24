@@ -84,8 +84,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                 await _context.SaveChangesAsync();
                 var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
 
-                Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId2);
-                 await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId2).SendAsync("childAttendanceUpdate", dto_attendance1);
+                //Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId2);
+                 await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance1);
                // await _hubContext.Clients.User(userId).SendAsync("childAttendanceUpdate", $"ITS WORKING WOHOO");
 
 
@@ -180,8 +180,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                 attendance.AbsenceDescription = attendanceCreateAbsenceRequest.AbsenceDescription;
                 await _context.SaveChangesAsync();
                 var dto_attendance1 = _mapper.Map<AttendanceResponse>(attendance);
-                Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId2);
-                await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId2).SendAsync("childAttendanceUpdate", dto_attendance1);
+                //Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId2);
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance1);
                 return Ok(dto_attendance1);
             }
 

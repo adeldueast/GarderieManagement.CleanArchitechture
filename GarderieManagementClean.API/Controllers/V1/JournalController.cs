@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
@@ -50,7 +52,9 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(result);
                 }
 
-
+                var updatedJournal = (result.Data as JournalDeBord);
+                var guardiansToNofity = updatedJournal.Enfant.Tutors.Select(te => te.ApplicationUser.Id).ToArray();
+                await _hubContext.Clients.Users(guardiansToNofity).SendAsync("newNotification", $"new notification avaible");
                 result.Data = _mapper.Map<JournalResponse>(result.Data);
                 return Ok(result);
             }
@@ -77,6 +81,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(result);
                 }
 
+                var tutors = result.Data as HashSet<string>;
+                await _hubContext.Clients.Users(tutors.ToArray()).SendAsync("newNotification", $"new notification avaible");
 
                 return Ok(result);
             }
@@ -105,10 +111,16 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return BadRequest(result);
                 }
 
-               await _hubContext.Clients.User(userId).SendAsync("ReceiveMessage", $"IT IS WORKING WOHOOO😁👿");
+               
+
+                var updatedJournal = (result.Data as JournalDeBord);
+                var guardiansToNofity = updatedJournal.Enfant.Tutors.Select(te => te.ApplicationUser.Id).ToArray();
+
+                await _hubContext.Clients.Users(guardiansToNofity).SendAsync("newNotification", $"new notification avaible");
+
 
                 result.Data = _mapper.Map<JournalResponse>(result.Data);
-            
+
                 return Ok(result);
             }
             catch (Exception e)

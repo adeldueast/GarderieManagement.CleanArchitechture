@@ -30,13 +30,15 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
         public async Task<Result<JournalDeBord>> createGroupedJournals(string userId, JournalGroupedCreateRequest journalGroupedCreateRequest)
         {
+            //TODO added a way to keep track of all guardians and send it in the result to notify them in controller using signalR, maybe clean the code , very ugly
             var user = await _userManager.FindByIdAsync(userId);
 
-            ICollection<Enfant> allEnfants = new List<Enfant>();
-
+           
+            HashSet<string> tutors = new HashSet<string>();
+            
             foreach (var enfant_rating in journalGroupedCreateRequest.Ratings)
             {
-                var enfant = await _context.Enfants.AsNoTracking().SingleOrDefaultAsync(e => e.Id == enfant_rating.Id && e.GarderieId == user.GarderieId);
+                var enfant = await _context.Enfants.SingleOrDefaultAsync(e => e.Id == enfant_rating.Id && e.GarderieId == user.GarderieId);
                 if (enfant == null)
                 {
                     return new Result<JournalDeBord>()
@@ -44,8 +46,14 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
                         Errors = new string[] { $"Enfant '{enfant_rating.Id}' doesnt not exist" }
                     };
                 }
-
+                //get all child's guardians'id
+                var enfant_tutors = enfant.Tutors.Select(te => te.ApplicationUser);
+                foreach (var tutor in enfant_tutors)
+                {
+                    tutors.Add(tutor.Id);
+                }
                 var existingJournal = await _context.JournalDeBords.SingleOrDefaultAsync(j => j.EnfantId == enfant.Id && j.CreatedAt.Date == DateTime.Now.Date);
+
                 if (existingJournal == null)
                 {
                     var newJournal = new JournalDeBord()
@@ -64,8 +72,18 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
                     };
 
+                    
                     _context.JournalDeBords.Add(newJournal);
+                    Notification notification1 = new Notification
+                    {
+                        CreatedAt = DateTime.Now,
+                        ApplicationUsers = new List<ApplicationUser>(enfant_tutors),
+                        NotificationType = NotificationTypes.Journal,
+                        DataId = newJournal.Id,
+                        Message = $"New journal for {enfant.Nom.Split(' ')[0]}",
 
+                    };
+                    await _notificationService.createNotification(notification1);
                     continue;
                 }
 
@@ -79,6 +97,19 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
                 existingJournal.Activite_Message = journalGroupedCreateRequest.Activite_Message;
                 existingJournal.Manger_Message = journalGroupedCreateRequest.Manger_Message;
+
+                Notification notification2 = new Notification
+                {
+                    CreatedAt = DateTime.Now,
+                    ApplicationUsers = new List<ApplicationUser>(enfant_tutors),
+                    NotificationType = NotificationTypes.Journal,
+                    DataId = existingJournal.Id,
+                    Message = $"New journal for {enfant.Nom.Split(' ')[0]}",
+
+                };
+                await _notificationService.createNotification(notification2);
+
+
             }
 
 
@@ -88,6 +119,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
             return new Result<JournalDeBord>()
             {
                 Success = true,
+                Data = tutors,
 
             };
 
@@ -281,12 +313,16 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
                 Message = $"Journal of {enfant.Nom.Split(' ')[0]} modified",
 
             };
+
+
             await _notificationService.createNotification(notification);
+
+
 
             return new Result<JournalDeBord>()
             {
                 Success = true,
-                Data = updatedJournal
+                Data = existingJournal
             };
 
         }

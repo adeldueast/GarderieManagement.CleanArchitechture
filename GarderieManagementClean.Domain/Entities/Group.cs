@@ -22,7 +22,7 @@ namespace GarderieManagementClean.Domain.Entities
 
         public string HexColor { get; set; }
 
-        public virtual Local Local { get; set; }
+
 
         //this is the one to one relation with ApplicationUser
 

@@ -80,7 +80,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
 
             newGroup.GarderieId = (int)user.GarderieId;
             newGroup.ApplicationUser = educatrice;
-            newGroup.Local = new Local();
+
 
             _context.Add(newGroup);
 

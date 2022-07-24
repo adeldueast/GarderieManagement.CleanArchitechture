@@ -16,7 +16,7 @@ namespace GarderieManagementClean.Infrastructure.Persistence
         public DbSet<Group> Groups { get; set; }
         public DbSet<Enfant> Enfants { get; set; }
 
-        public DbSet<Local> Locals { get; set; }
+        public DbSet<Photo> Photos { get; set; }
 
 
         public DbSet<JournalDeBord> JournalDeBords { get; set; }
@@ -37,6 +37,15 @@ namespace GarderieManagementClean.Infrastructure.Persistence
             
             modelBuilder.Entity<TutorEnfant>()
                 .HasKey(te => new { te.EnfantId, te.ApplicationUserId });
+
+            modelBuilder.Entity<Photo>()
+                .HasOne(p => p.Enfant)
+                .WithMany(e => e.Photos);
+
+            modelBuilder.Entity<Photo>()
+               .HasOne(p => p.PhotoCouvertureDe)
+               .WithOne(e => e.PhotoCouverture)
+               .HasForeignKey<Photo>(p=>p.EnfantId);
 
             //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-6.0#add-all-user-navigation-properties
             modelBuilder.Entity<ApplicationUser>(b =>

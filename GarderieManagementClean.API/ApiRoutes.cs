@@ -151,5 +151,25 @@
             public const string Delete = Base + notification + "Delete";
         }
 
+
+        public static class Photos
+        {
+            public const string photos = "Photos/";
+
+            public const string Get = Base + photos + "Get";
+
+            public const string CouvertureEnfant = Base + photos + "Couverture/Enfant/{enfantId:int}";
+
+
+
+
+            public const string MarkSeen = Base + photos + "MarkSeen/{notificationId:int}";
+
+            public const string MarkAllSeen = Base + photos + "MarkAllSeen";
+
+
+            public const string Delete = Base + photos + "Delete";
+        }
+
     }
 }

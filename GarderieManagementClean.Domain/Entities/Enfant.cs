@@ -29,7 +29,11 @@ namespace GarderieManagementClean.Domain.Entities
         public virtual List<Attendance> Attendances { get; set; }
 
 
-        public int? LocalId { get; set; }
-        public virtual Local Local { get; set; }
+        public virtual List<Photo> Photos { get; set; }
+
+        public virtual Photo?  PhotoCouverture { get; set; }
+
+
+
     }
 }

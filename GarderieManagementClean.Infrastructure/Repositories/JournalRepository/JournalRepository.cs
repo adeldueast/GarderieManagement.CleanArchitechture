@@ -104,7 +104,8 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
                     ApplicationUsers = new List<ApplicationUser>(enfant_tutors),
                     NotificationType = NotificationTypes.Journal,
                     DataId = existingJournal.Id,
-                    Message = $"New journal for {enfant.Nom.Split(' ')[0]}",
+                    Message = $"Journal of {enfant.Nom.Split(' ')[0]} modified",
+
 
                 };
                 await _notificationService.createNotification(notification2);

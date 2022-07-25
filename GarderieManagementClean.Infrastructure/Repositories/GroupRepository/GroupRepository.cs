@@ -119,7 +119,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
             }
 
 
-            var group = _context.Groups.Include(g=>g.Enfants).SingleOrDefault(g => g.GarderieId == (int)user.GarderieId && g.Id == GroupId);
+            var group = _context.Groups.Include(g => g.Enfants).SingleOrDefault(g => g.GarderieId == (int)user.GarderieId && g.Id == GroupId);
 
             if (group == null)
             {
@@ -156,14 +156,19 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
 
 
             var groups = await _context.Groups.Where(g => g.GarderieId == user.GarderieId)
-                .Select(g => new 
+                .Select(g => new
                 {
                     Id = g.Id,
                     Name = g.Name,
                     HexColor = g.HexColor,
                     EducatriceFullName = $"{g.ApplicationUser.FirstName} {g.ApplicationUser.LastName}",
                     //list of childs that are actually present (has arrived)
-                    EnfantsIds = g.Enfants.Where(e => e.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue)).Select(x => x.Id).ToList(),
+                    Enfants = g.Enfants.Where(e => e.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue))
+                    .Select(x =>new
+                    {
+                        Image  = x.PhotoCouverture != null ? x.PhotoCouverture.Id.ToString() : null,
+                        Nom = x.Nom
+                    }).ToList(),
                     //hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
 
                 })
@@ -200,7 +205,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.GroupRepository
                 };
             }
 
-         
+
             return new Result<Group>
             {
                 Success = true,

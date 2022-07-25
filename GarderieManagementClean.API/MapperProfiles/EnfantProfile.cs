@@ -11,7 +11,10 @@ namespace GarderieManagementClean.API.MapperProfiles
     {
         public EnfantProfile()
         {
-            CreateMap<Enfant, EnfantResponse>().ReverseMap();
+            CreateMap<Enfant, EnfantResponse>()
+                 .ForMember(dest => dest.Image,
+                    opt => opt.MapFrom(src => src.PhotoCouverture != null ? src.PhotoCouverture.Id.ToString() : null));
+
             CreateMap<object, EnfantResponse>().ReverseMap();
 
             CreateMap<Enfant, EnfantDetailResponse>().ReverseMap();

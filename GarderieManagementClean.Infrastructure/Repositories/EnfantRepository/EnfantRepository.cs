@@ -262,8 +262,9 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     Nom = x.Nom,
                     hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
                     Group = x.Group.Name,
-                    HexColor = x.Group.HexColor
-
+                    HexColor = x.Group.HexColor,
+                    PhotoCouverture = x.PhotoCouverture != null ? x.PhotoCouverture.Id : null 
+                    
 
                 })
                 .ToListAsync();
@@ -311,7 +312,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
             }
             else
             {
-                enfant = await _context.Enfants.FirstOrDefaultAsync(x => x.GarderieId == user.GarderieId && x.Id == EnfantId);
+                enfant = await _context.Enfants.SingleOrDefaultAsync(x => x.GarderieId == user.GarderieId && x.Id == EnfantId);
 
             }
 

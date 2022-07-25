@@ -10,6 +10,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
@@ -22,6 +23,9 @@ namespace GarderieManagementClean.API.Controllers.V1
         private readonly ApplicationDbContext _context;
 
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+
 
 
         public PhotosController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
@@ -31,8 +35,8 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-        [HttpPost(ApiRoutes.Photos.CouvertureEnfant)]
-        public async Task<IActionResult> PostEnfantPhotoCouverture([FromRoute] int enfantId)
+        [HttpPost(ApiRoutes.Photos.PostCouvertureEnfant)]
+        public async Task<IActionResult> PostEnfantCouverture([FromRoute] int enfantId)
         {
             var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
 
@@ -105,72 +109,126 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [HttpPost("Gallerie/{voyageId}")]
-        [DisableRequestSizeLimit]
-        public async Task<IActionResult> PostEnfantPhotoGallerie([FromRoute] int enfantId)
+        //[HttpPost("Gallerie/{voyageId}")]
+        //[DisableRequestSizeLimit]
+        //public async Task<IActionResult> PostEnfantPhotoGallerie([FromRoute] int enfantId)
+        //{
+
+        //    var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
+
+        //    var enfant = await _context.Enfants
+        //      .SingleOrDefaultAsync(e =>
+        //      e.Id == enfantId &&
+        //      e.GarderieId == user.GarderieId);
+
+        //    if (enfant == null)
+        //    {
+        //        return NotFound($"Enfant '{enfantId}' does not exist");
+        //    }
+
+        //    try
+        //    {
+
+        //        IFormCollection formCollection = await Request.ReadFormAsync();
+        //        IFormFile file = formCollection.Files.GetFile("image");
+
+        //        Image image = Image.Load(file.OpenReadStream());
+
+        //        Photo photo = new Photo()
+        //        {
+        //            Enfant = enfant,
+        //            FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName),
+        //            MimeType = file.ContentType
+        //        };
+
+        //        var lg = Directory.CreateDirectory($"C://images//lg//");
+        //        var md = Directory.CreateDirectory($"C://images//md//");
+        //        var sm = Directory.CreateDirectory($"C://images//sm//");
+
+        //        image.Save($"{lg.FullName}" + photo.FileName);
+
+        //        image.Mutate(i =>
+        //        i.Resize(new ResizeOptions()
+        //        {
+        //            Mode = ResizeMode.Min,
+        //            Size = new Size() { Height = 720 }
+        //        }));
+        //        image.Save($"{md.FullName} " + photo.FileName);
+
+
+        //        image.Mutate(i =>
+        //        i.Resize(new ResizeOptions()
+        //        {
+        //            Mode = ResizeMode.Min,
+        //            Size = new Size() { Height = 320 }
+        //        }));
+        //        image.Save($"{sm.FullName}" + photo.FileName);
+
+
+
+        //        await _context.Photos.AddAsync(photo);
+        //        await _context.SaveChangesAsync();
+
+        //        return Ok();
+
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, ex.Message);
+        //    }
+
+
+
+
+        //}
+
+
+        [HttpGet(ApiRoutes.Photos.GetCouvertureEnfant)]
+        public async Task<IActionResult> GetEnfantCouverture([FromRoute]string size, [FromRoute] int id)
         {
-
-            var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
-
-            var enfant = await _context.Enfants
-              .SingleOrDefaultAsync(e =>
-              e.Id == enfantId &&
-              e.GarderieId == user.GarderieId);
-
-            if (enfant == null)
-            {
-                return NotFound($"Enfant '{enfantId}' does not exist");
-            }
-
             try
             {
 
-                IFormCollection formCollection = await Request.ReadFormAsync();
-                IFormFile file = formCollection.Files.GetFile("image");
+                //Get the user requesting th photo
+                var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
 
-                Image image = Image.Load(file.OpenReadStream());
-
-                Photo photo = new Photo()
+                //Get the photo
+                //  User needs to be an educator OR a guardian of the child
+                var userRoles = await _userManager.GetRolesAsync(user);
+                Photo photo = null;
+                if (userRoles.Contains("tutor"))
                 {
-                    Enfant = enfant,
-                    FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName),
-                    MimeType = file.ContentType
-                };
-
-                var lg = Directory.CreateDirectory($"C://images//lg//");
-                var md = Directory.CreateDirectory($"C://images//md//");
-                var sm = Directory.CreateDirectory($"C://images//sm//");
-
-                image.Save($"{lg.FullName}" + photo.FileName);
-
-                image.Mutate(i =>
-                i.Resize(new ResizeOptions()
+                    //is a guardian
+                    photo = await _context.Photos
+                        .SingleOrDefaultAsync(p =>
+                        p.Id == id &&
+                        p.PhotoCouvertureDe.GarderieId == user.GarderieId &&
+                        p.PhotoCouvertureDe.Tutors.Select(te => te.ApplicationUser).ToList().Contains(user));
+                }
+                else
                 {
-                    Mode = ResizeMode.Min,
-                    Size = new Size() { Height = 720 }
-                }));
-                image.Save($"{md.FullName} " + photo.FileName);
-
-
-                image.Mutate(i =>
-                i.Resize(new ResizeOptions()
+                    //is an educator
+                    photo = await _context.Photos
+                       .SingleOrDefaultAsync(p => p.Id == id && p.PhotoCouvertureDe.GarderieId == user.GarderieId);
+                }
+                if (photo == null)
                 {
-                    Mode = ResizeMode.Min,
-                    Size = new Size() { Height = 320 }
-                }));
-                image.Save($"{sm.FullName}" + photo.FileName);
+                    return NotFound($"Photo doesnt exist");
+                }
 
 
 
-                await _context.Photos.AddAsync(photo);
-                await _context.SaveChangesAsync();
+                byte[] bytes;
 
-                return Ok();
+                bytes = System.IO.File.ReadAllBytes($"C://images/{size}/{photo.FileName}");
+                //bytes = System.IO.File.ReadAllBytes(@"C://images//" + size + "//" + photo.FileName);
 
-
+                return File(bytes, photo.MimeType);
             }
             catch (Exception ex)
             {
+
                 return StatusCode(500, ex.Message);
             }
 

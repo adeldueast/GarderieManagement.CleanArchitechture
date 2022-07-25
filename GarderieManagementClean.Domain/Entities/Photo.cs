@@ -8,7 +8,7 @@ namespace GarderieManagementClean.Domain.Entities
 {
     public class Photo
     {
-       
+
         public int Id { get; set; }
 
         public string FileName { get; set; }
@@ -22,6 +22,9 @@ namespace GarderieManagementClean.Domain.Entities
 
 
         public virtual Enfant? PhotoCouvertureDe { get; set; }
+
+
+        //public bool isPhotoCouverture { get => this.PhotoCouvertureDe != null; }
 
     }
 }

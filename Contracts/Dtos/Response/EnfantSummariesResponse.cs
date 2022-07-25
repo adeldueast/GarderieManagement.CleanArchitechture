@@ -20,5 +20,7 @@ namespace Contracts.Dtos.Response
 
         public string HexColor { get; set; }
 
+        public int? PhotoCouverture { get; set; }
+
     }
 }

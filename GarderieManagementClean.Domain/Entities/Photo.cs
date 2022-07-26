@@ -17,10 +17,13 @@ namespace GarderieManagementClean.Domain.Entities
 
 
 
+   
+
+        public virtual List<Enfant> Enfants { get; set; }
+
+
+
         public int? EnfantId { get; set; }
-        public virtual Enfant Enfant { get; set; }
-
-
         public virtual Enfant? PhotoCouvertureDe { get; set; }
 
 

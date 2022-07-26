@@ -39,7 +39,7 @@ namespace GarderieManagementClean.Infrastructure.Persistence
                 .HasKey(te => new { te.EnfantId, te.ApplicationUserId });
 
             modelBuilder.Entity<Photo>()
-                .HasOne(p => p.Enfant)
+                .HasMany(p => p.Enfants)
                 .WithMany(e => e.Photos);
 
             modelBuilder.Entity<Photo>()

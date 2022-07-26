@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,9 +35,9 @@ namespace GarderieManagementClean.API.Controllers.V1
             _userManager = userManager;
         }
 
-
+        [Authorize(Roles = "owner,admin,employee")]
         [HttpPost(ApiRoutes.Photos.PostCouvertureEnfant)]
-        public async Task<IActionResult> PostEnfantCouverture([FromRoute] int enfantId)
+        public async Task<IActionResult> PostCouvertureEnfant([FromRoute] int enfantId)
         {
             var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
 
@@ -109,122 +110,180 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        //[HttpPost("Gallerie/{voyageId}")]
-        //[DisableRequestSizeLimit]
-        //public async Task<IActionResult> PostEnfantPhotoGallerie([FromRoute] int enfantId)
-        //{
+        [Authorize(Roles = "owner,admin,employee")]
+        [HttpPost(ApiRoutes.Photos.PostGallerieEnfant)]
+        public async Task<IActionResult> PostGallerieEnfant([FromQuery] int[] enfantIds)
+        {
 
-        //    var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
+            var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
 
-        //    var enfant = await _context.Enfants
-        //      .SingleOrDefaultAsync(e =>
-        //      e.Id == enfantId &&
-        //      e.GarderieId == user.GarderieId);
+            //Check if ids are all valid ids
+            ICollection<Enfant> enfants = new List<Enfant>();
+            foreach (var enfantId in enfantIds)
+            {
+                var enfant = await _context.Enfants
+                    .SingleOrDefaultAsync(e => e.Id == enfantId && e.GarderieId == user.GarderieId);
 
-        //    if (enfant == null)
-        //    {
-        //        return NotFound($"Enfant '{enfantId}' does not exist");
-        //    }
+                if (enfant == null)
+                {
+                    return NotFound($"Enfant '{enfantId}' does not exist");
+                }
 
-        //    try
-        //    {
+                enfants.Add(enfant);
 
-        //        IFormCollection formCollection = await Request.ReadFormAsync();
-        //        IFormFile file = formCollection.Files.GetFile("image");
-
-        //        Image image = Image.Load(file.OpenReadStream());
-
-        //        Photo photo = new Photo()
-        //        {
-        //            Enfant = enfant,
-        //            FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName),
-        //            MimeType = file.ContentType
-        //        };
-
-        //        var lg = Directory.CreateDirectory($"C://images//lg//");
-        //        var md = Directory.CreateDirectory($"C://images//md//");
-        //        var sm = Directory.CreateDirectory($"C://images//sm//");
-
-        //        image.Save($"{lg.FullName}" + photo.FileName);
-
-        //        image.Mutate(i =>
-        //        i.Resize(new ResizeOptions()
-        //        {
-        //            Mode = ResizeMode.Min,
-        //            Size = new Size() { Height = 720 }
-        //        }));
-        //        image.Save($"{md.FullName} " + photo.FileName);
-
-
-        //        image.Mutate(i =>
-        //        i.Resize(new ResizeOptions()
-        //        {
-        //            Mode = ResizeMode.Min,
-        //            Size = new Size() { Height = 320 }
-        //        }));
-        //        image.Save($"{sm.FullName}" + photo.FileName);
-
-
-
-        //        await _context.Photos.AddAsync(photo);
-        //        await _context.SaveChangesAsync();
-
-        //        return Ok();
-
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex.Message);
-        //    }
+            }
 
 
 
 
-        //}
+            try
+            {
+
+                IFormCollection formCollection = await Request.ReadFormAsync();
+                IFormFile file = formCollection.Files.GetFile("image");
+
+                Image image = Image.Load(file.OpenReadStream());
+
+                Photo photo = new Photo()
+                {
+                    Enfants = new List<Enfant>(enfants),
+                    FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName),
+                    MimeType = file.ContentType
+                };
+
+                var lg = Directory.CreateDirectory($"C://images//lg//");
+                var md = Directory.CreateDirectory($"C://images//md//");
+                var sm = Directory.CreateDirectory($"C://images//sm//");
+
+                image.Save($"{lg.FullName}" + photo.FileName);
+
+                image.Mutate(i =>
+                i.Resize(new ResizeOptions()
+                {
+                    Mode = ResizeMode.Min,
+                    Size = new Size() { Height = 720 }
+                }));
+                image.Save($"{md.FullName} " + photo.FileName);
 
 
-        [HttpGet(ApiRoutes.Photos.GetCouvertureEnfant)]
-        public async Task<IActionResult> GetEnfantCouverture([FromRoute]string size, [FromRoute] int id)
+                image.Mutate(i =>
+                i.Resize(new ResizeOptions()
+                {
+                    Mode = ResizeMode.Min,
+                    Size = new Size() { Height = 320 }
+                }));
+                image.Save($"{sm.FullName}" + photo.FileName);
+
+
+
+                await _context.Photos.AddAsync(photo);
+                await _context.SaveChangesAsync();
+
+                return Ok();
+
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
+
+        }
+
+
+        [Authorize(Roles = "owner,admin,employee,tutor")]
+        [HttpGet(ApiRoutes.Photos.Get)]
+        public async Task<IActionResult> GetPhoto([FromRoute] string size, [FromRoute] int id)
         {
             try
             {
 
-                //Get the user requesting th photo
+                //Get the user requesting the photo
                 var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
 
-                //Get the photo
-                //  User needs to be an educator OR a guardian of the child
-                var userRoles = await _userManager.GetRolesAsync(user);
-                Photo photo = null;
-                if (userRoles.Contains("tutor"))
-                {
-                    //is a guardian
-                    photo = await _context.Photos
-                        .SingleOrDefaultAsync(p =>
-                        p.Id == id &&
-                        p.PhotoCouvertureDe.GarderieId == user.GarderieId &&
-                        p.PhotoCouvertureDe.Tutors.Select(te => te.ApplicationUser).ToList().Contains(user));
-                }
-                else
-                {
-                    //is an educator
-                    photo = await _context.Photos
-                       .SingleOrDefaultAsync(p => p.Id == id && p.PhotoCouvertureDe.GarderieId == user.GarderieId);
-                }
+
+                var photo = await _context.Photos.SingleOrDefaultAsync(p => p.Id == id);
+
                 if (photo == null)
                 {
-                    return NotFound($"Photo doesnt exist");
+                    return NotFound($"Photo {id} does not exist");
+                }
+
+                //Get the user's roles
+                var userRoles = await _userManager.GetRolesAsync(user);
+
+                // is a photo couverture of enfant
+                if (photo.PhotoCouvertureDe != null)
+                {
+                    if (userRoles.Contains("tutor"))
+                    {
+                        //is a tutor, add security
+                        //security checks  (same garderie && user and request photo's are linked)
+                        var isAuthorized = photo.PhotoCouvertureDe.GarderieId == user.GarderieId && photo.PhotoCouvertureDe.Tutors.Select(te => te.ApplicationUser).ToList().Contains(user);
+                        if (!isAuthorized)
+                        {
+                            return NotFound($"Photo {id} does not exist");
+                        }
+                        byte[] bytes;
+                        bytes = System.IO.File.ReadAllBytes($"C://images/{size}/{photo.FileName}");
+                        return File(bytes, photo.MimeType);
+                    }
+                    else
+                    {
+                        //is an educator, add security
+                        //security checks  (same garderie)
+                        if (!(photo.PhotoCouvertureDe.GarderieId == user.GarderieId))
+                        {
+                            return NotFound($"Photo {id} does not exist");
+                        }
+                        byte[] bytes;
+                        bytes = System.IO.File.ReadAllBytes($"C://images/{size}/{photo.FileName}");
+                        return File(bytes, photo.MimeType);
+                    }
+
+
+                }
+
+                // is a photo couverture of user
+                // is a photo of gallerie of enfant 
+                if (photo.Enfants != null && photo.Enfants.Count > 0)
+                {
+                    if (userRoles.Contains("tutor"))
+                    {
+                        //is a tutor, add security
+                        //security checks  (same garderie && user and request photo's are linked)
+
+                        var isAuthorized = photo.Enfants.All(e => e.Id == user.GarderieId && e.Tutors.Select(te => te.ApplicationUser).Contains(user));
+                        if (!isAuthorized)
+                        {
+                            return NotFound($"Photo {id} does not exist");
+                        }
+
+
+                        byte[] bytes;
+                        bytes = System.IO.File.ReadAllBytes($"C://images/{size}/{photo.FileName}");
+                        return File(bytes, photo.MimeType);
+                    }
+                    else
+                    {
+                        //is an educator, add security
+                        //security checks  (same garderie)
+                        if (!(photo.PhotoCouvertureDe.GarderieId == user.GarderieId))
+                        {
+                            return NotFound($"Photo {id} does not exist");
+                        }
+                        byte[] bytes;
+                        bytes = System.IO.File.ReadAllBytes($"C://images/{size}/{photo.FileName}");
+                        return File(bytes, photo.MimeType);
+                    }
                 }
 
 
 
-                byte[] bytes;
+                return NotFound();
 
-                bytes = System.IO.File.ReadAllBytes($"C://images/{size}/{photo.FileName}");
-                //bytes = System.IO.File.ReadAllBytes(@"C://images//" + size + "//" + photo.FileName);
 
-                return File(bytes, photo.MimeType);
             }
             catch (Exception ex)
             {
@@ -236,6 +295,11 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
         }
+
+
+
+
+
 
     }
 }

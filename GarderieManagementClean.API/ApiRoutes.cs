@@ -161,7 +161,10 @@
 
             public const string PostCouvertureEnfant = Base + photos + "Couverture/Enfant/{enfantId:int}";
 
-            public const string GetCouvertureEnfant = Base + photos + "Couverture/{size}/{id}";
+            public const string PostGallerieEnfant = Base + photos + "Gallerie/Enfant/{enfantId:int}";
+
+
+            public const string Get = Base + photos + "{size}/{id}";
 
 
         }

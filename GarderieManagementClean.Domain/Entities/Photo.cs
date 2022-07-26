@@ -16,8 +16,9 @@ namespace GarderieManagementClean.Domain.Entities
         public string MimeType { get; set; }
 
 
+        public string Description { get; set; }
 
-   
+
 
         public virtual List<Enfant> Enfants { get; set; }
 

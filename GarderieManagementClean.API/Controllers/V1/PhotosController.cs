@@ -1,10 +1,13 @@
 ﻿using GarderieManagementClean.API.Extensions;
+using GarderieManagementClean.API.HubConfig;
+using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -23,17 +26,22 @@ namespace GarderieManagementClean.API.Controllers.V1
     {
         private readonly ApplicationDbContext _context;
 
+        private readonly INotificationService _notificationService;
+
         private readonly UserManager<ApplicationUser> _userManager;
 
+        private readonly IHubContext<ChildrenHub> _hubContext;
 
 
 
-
-        public PhotosController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public PhotosController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IHubContext<ChildrenHub> hubContext, INotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
+            _hubContext = hubContext;
+            _notificationService = notificationService;
         }
+
 
         [Authorize(Roles = "owner,admin,employee")]
         [HttpPost(ApiRoutes.Photos.PostCouvertureEnfant)]
@@ -60,7 +68,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             try
             {
                 IFormCollection formCollection = await Request.ReadFormAsync();
-                IFormFile file = formCollection.Files.GetFile("image");
+                IFormFile file = formCollection.Files.GetFile("files");
                 Image image = Image.Load(file.OpenReadStream());
 
                 Photo photo = new Photo()
@@ -70,32 +78,11 @@ namespace GarderieManagementClean.API.Controllers.V1
                     MimeType = file.ContentType
                 };
 
-                var lg = Directory.CreateDirectory($"C://images//lg//");
-                var md = Directory.CreateDirectory($"C://images//md//");
-                var sm = Directory.CreateDirectory($"C://images//sm//");
 
-                image.Save($"C://images//lg//" + photo.FileName);
-
-                image.Mutate(i =>
-                i.Resize(new ResizeOptions()
-                {
-                    Mode = ResizeMode.Min,
-                    Size = new Size() { Height = 720 }
-                }));
-                image.Save($"C://images//md//" + photo.FileName);
+                SaveImages(image, photo);
 
 
-                image.Mutate(i =>
-                i.Resize(new ResizeOptions()
-                {
-                    Mode = ResizeMode.Min,
-                    Size = new Size() { Height = 320 }
-                }));
-                image.Save($"C://images//sm//" + photo.FileName);
-
-
-
-                await _context.Photos.AddAsync(photo);
+                _context.Photos.Add(photo);
                 await _context.SaveChangesAsync();
 
                 return Ok(photo.Id);
@@ -109,10 +96,10 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
-
+        //Todo Notify parents when new photo is added
         [Authorize(Roles = "owner,admin,employee")]
         [HttpPost(ApiRoutes.Photos.PostGallerieEnfant)]
-        public async Task<IActionResult> PostGallerieEnfant()
+        public async Task<IActionResult> PostGallerieEnfant([FromForm] PostGalleriePhotosRequest input)
         {
 
             //Get logged in user
@@ -120,76 +107,86 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-
-
-
             try
             {
 
-                IFormCollection formCollection = await Request.ReadFormAsync();
-                IReadOnlyList<IFormFile> files = formCollection.Files.GetFiles("image");
+
+                //Get the files (photos)
+                var files = input.Files;
+
+                //Get the childrenIds that will be assigned to the photo
+                var enfantsIds = input.EnfantsIds;
 
 
-                var enfantsIds = formCollection["enfantIds"];
 
-                //Check if ids are all valid ids
+
+
+                //Check if childrenIds are all valid ids
                 ICollection<Enfant> enfants = new List<Enfant>();
-                foreach (var enfantId in enfantsIds.ToString().Split(',').AsEnumerable())
+                foreach (var enfantId in enfantsIds)
                 {
                     var enfant =
                         await _context.Enfants
-                        .SingleOrDefaultAsync(e => e.Id == int.Parse(enfantId) && e.GarderieId == user.GarderieId);
+                        .Include(e => e.Tutors)
+                        .ThenInclude(te => te.ApplicationUser)
+                        .SingleOrDefaultAsync(e => e.Id == enfantId && e.GarderieId == user.GarderieId);
 
                     if (enfant == null)
                     {
                         return NotFound($"Enfant '{enfantId}' does not exist");
                     }
-
+                    //add tracked child to childList because we will need them after
                     enfants.Add(enfant);
-
                 }
 
+
+                //Foreach file(image), create a Photo Entity, save it on the machine, add photo in collection so we can save all changes in one (saveChangesAsync()) after the loop
+                ICollection<Photo> photos = new List<Photo>();
                 foreach (var file in files)
                 {
                     Image image = Image.Load(file.OpenReadStream());
-
                     Photo photo = new Photo()
                     {
+                        Description = input.Description,
                         Enfants = new List<Enfant>(enfants),
                         FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName),
                         MimeType = file.ContentType
                     };
 
-                    var lg = Directory.CreateDirectory($"C://images//lg//");
-                    var md = Directory.CreateDirectory($"C://images//md//");
-                    var sm = Directory.CreateDirectory($"C://images//sm//");
-
-                    image.Save($"{lg.FullName}" + photo.FileName);
-
-                    image.Mutate(i =>
-                    i.Resize(new ResizeOptions()
-                    {
-                        Mode = ResizeMode.Min,
-                        Size = new Size() { Height = 720 }
-                    }));
-                    image.Save($"{md.FullName} " + photo.FileName);
-
-
-                    image.Mutate(i =>
-                    i.Resize(new ResizeOptions()
-                    {
-                        Mode = ResizeMode.Min,
-                        Size = new Size() { Height = 320 }
-                    }));
-                    image.Save($"{sm.FullName}" + photo.FileName);
-
-                    await _context.Photos.AddAsync(photo);
-
+                    SaveImages(image, photo);
+                    photos.Add(photo);
+                    _context.Photos.Add(photo);
 
                 }
                 await _context.SaveChangesAsync();
 
 
+                HashSet<string> tutorsToNotify = new HashSet<string>();
+                foreach (var photo in photos)
+                {
+                    foreach (var enfant in enfants)
+                    {
+                        //keep track of all parents that will be notified for new Photo of their child
+                        enfant.Tutors.Select(te => te.ApplicationUser.Id).ToList().ForEach(tutorId => tutorsToNotify.Add(tutorId));
+
+                        Notification notification = new Notification
+                        {
+                            CreatedAt = DateTime.Now,
+                            ApplicationUsers = new List<ApplicationUser>(enfant.Tutors.Select(te => te.ApplicationUser)),
+                            NotificationType = NotificationTypes.Photo,
+                            DataId = photo.Id,
+                            Message = $"New photo available for {enfant.Nom.Split(' ')[0]}",
+
+                        };
+
+                        _context.Notifications.Add(notification);
+
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                //notify all parents of a new image for their kids using signalR
+                await _hubContext.Clients.Users(tutorsToNotify).SendAsync("newNotification", $"new notification avaible");
                 return Ok();
 
 
@@ -202,6 +199,31 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
+        private static void SaveImages(Image image, Photo photo)
+        {
+            // image.Save($"{lg.FullName}" + photo.FileName);
+            image.Save($"C://images//lg//" + photo.FileName);
+            image.Mutate(i =>
+            i.Resize(new ResizeOptions()
+            {
+                Mode = ResizeMode.Min,
+                Size = new Size() { Height = 720 }
+            }));
+            //  image.Save($"{md.FullName} " + photo.FileName);
+            image.Save($"C://images//md//" + photo.FileName);
+
+
+
+            image.Mutate(i =>
+            i.Resize(new ResizeOptions()
+            {
+                Mode = ResizeMode.Min,
+                Size = new Size() { Height = 320 }
+            }));
+
+            // image.Save($"{sm.FullName}" + photo.FileName);
+            image.Save($"C://images//sm//" + photo.FileName);
+        }
 
         [Authorize(Roles = "owner,admin,employee,tutor")]
         [HttpGet(ApiRoutes.Photos.Get)]
@@ -227,7 +249,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                     return NotFound($"Photo {id} does not exist");
                 }
 
-                //Return the file depending on what type of photo it is (special relation between photo and Child)
+                //Return the file depending on what type of photo it is (special relation between photo and Child) and the type of user requesting(role) 
                 return await returnFileIfAuthorized(photo, user, size, id);
             }
             catch (Exception ex)
@@ -242,10 +264,12 @@ namespace GarderieManagementClean.API.Controllers.V1
             var userRoles = await _userManager.GetRolesAsync(user);
 
             //depending on what type of photo it is (Profile photo, or photo of gallerie of a child) and depending on the user requesting (educator or child's guardian(tutor))
+            //If PhotoCouvertureDe != null, photo is of type profile picture (one to one relation with child)
             var isAuthorizedd = photo.PhotoCouvertureDe != null
                 ? userRoles.Contains("tutor") == true
                     ? photo.PhotoCouvertureDe.GarderieId == user.GarderieId && photo.PhotoCouvertureDe.Tutors.Select(te => te.ApplicationUser).Contains(user)
                     : photo.PhotoCouvertureDe.GarderieId == user.GarderieId
+                //Else, it is a photo of type gallerie photo (many-to-many) relation with childs, security check slightly different 
                 : userRoles.Contains("tutor") == true
                     ? photo.Enfants.Any(e => e.GarderieId == user.GarderieId && e.Tutors.Select(te => te.ApplicationUser).Contains(user))
                     : photo.Enfants.All(e => e.GarderieId == user.GarderieId);
@@ -261,7 +285,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [HttpGet(ApiRoutes.Photos.GetPhotosGallerieIdsOfAllEnfants)]
+        [HttpGet(ApiRoutes.Photos.GetAllGalleriePhotos)]
         [Authorize(Roles = "owner,admin,employee")]
         public async Task<IActionResult> getPhotoIdsOfAllEnfants()
         {
@@ -278,7 +302,87 @@ namespace GarderieManagementClean.API.Controllers.V1
         }
 
 
+        [HttpGet(ApiRoutes.Photos.GetGalleriePhotosOfEnfant)]
+        [Authorize(Roles = "owner,admin,employee,tutor")]
+        public async Task<IActionResult> getPhotoIdsOfEnfant([FromRoute] int enfantId)
+        {
+            //[FromBody] int[] enfantIds
+            //Get logged in user
+            var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
+
+            //returns all photo's ids except for the ones tht are profile photos
+            if (await _userManager.IsInRoleAsync(user, "tutor"))
+            {
+                var imagess = await _context.Photos
+             .Where(photo => photo.Enfants.Count > 0 && photo.Enfants.Any(enfant => enfant.Id == enfantId && enfant.GarderieId == user.GarderieId && enfant.Tutors.Select(te => te.ApplicationUser).Any(t => t.Id == user.Id)))
+             .Select(p => new { p.Id, p.Description }).ToListAsync();
+
+                return Ok(imagess);
+            }
+            var images = await _context.Photos
+                .Where(photo => photo.Enfants.Count > 0 && photo.Enfants.Any(enfant => enfant.Id == enfantId && enfant.GarderieId == user.GarderieId))
+                .Select(p => new { p.Id, p.Description }).ToListAsync();
+
+            return Ok(images);
+        }
 
 
+
+        [HttpGet(ApiRoutes.Photos.GetPhotoInformation)]
+        [Authorize(Roles = "owner,admin,employee,tutor")]
+        public async Task<IActionResult> getPhotoInformation([FromRoute] int photoId)
+        {
+
+
+            var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
+
+            if (await _userManager.IsInRoleAsync(user, "tutor"))
+            {
+                var image = await _context.Photos
+                    .Where(p => p.Id == photoId && p.Enfants.SelectMany(e => e.Tutors.Select(te => te.ApplicationUser)).Contains(user))
+                    .Select(p => new { p.Id, p.Description })
+                    .SingleOrDefaultAsync();
+
+                if (image is null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(image);
+
+
+            }
+
+            return NotFound();
+
+        }
+
+
+        //TOTO: Add delete Action
+        public class PostGalleriePhotosRequest
+        {
+
+
+            public IReadOnlyList<IFormFile> Files { get; set; }
+
+            public string Description { get; set; }
+            public string Enfants { get; set; }
+            public IEnumerable<int> EnfantsIds
+            {
+                get
+                {
+                    return this.Enfants.Split(',').Select(Int32.Parse).ToList();
+
+                }
+                set
+                {
+
+                }
+            }
+
+
+
+
+        }
     }
 }

@@ -50,6 +50,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
 
             var enfant = await _context.Enfants
+              .Include(e => e.PhotoCouverture)
               .SingleOrDefaultAsync(e =>
               e.Id == enfantId &&
               e.GarderieId == user.GarderieId);
@@ -84,7 +85,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
                 _context.Photos.Add(photo);
                 await _context.SaveChangesAsync();
-
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", $"gallerie was updated");
                 return Ok(photo.Id);
 
             }
@@ -187,6 +188,9 @@ namespace GarderieManagementClean.API.Controllers.V1
                 await _context.SaveChangesAsync();
                 //notify all parents of a new image for their kids using signalR
                 await _hubContext.Clients.Users(tutorsToNotify).SendAsync("newNotification", $"new notification avaible");
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", $"gallerie was updated");
+
+
                 return Ok();
 
 
@@ -280,7 +284,10 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
 
             var file = $"C:/images/{size}/{photo.FileName}";
-            return new FileStreamResult(new FileStream(file, FileMode.Open), photo.MimeType);
+            var bytes = System.IO.File.ReadAllBytes(file);
+
+            return File(bytes, photo.MimeType);
+            //return new FileStreamResult(new FileStream(file, FileMode.Open), photo.MimeType);
         }
 
 
@@ -296,11 +303,29 @@ namespace GarderieManagementClean.API.Controllers.V1
             //returns all photo's ids except for the ones tht are profile photos
             var images = await _context.Photos
                 .Where(photo => photo.Enfants.Count > 0 && photo.Enfants.All(enfant => enfant.GarderieId == user.GarderieId))
-                .Select(p => new { p.Id, p.Description }).ToListAsync();
+                .Select(p => new { p.Id, p.Description })
+                .ToListAsync();
 
             return Ok(images);
         }
 
+
+        [HttpGet(ApiRoutes.Photos.GetAllGaleriePhotoOfEnfantsOfTutor)]
+        [Authorize(Roles = "tutor")]
+        public async Task<IActionResult> getPhotoIdsOfAllEnfantsOfTutor()
+        {
+            //[FromBody] int[] enfantIds
+            //Get logged in user
+            var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
+
+            //returns all photo's ids except for the ones tht are profile photos
+            var images = await _context.Photos
+                .Where(photo => photo.Enfants.Count > 0 && photo.Enfants.Any(enfant => enfant.GarderieId == user.GarderieId && enfant.Tutors.Select(te => te.ApplicationUser).Contains(user)))
+                .Select(p => new { p.Id, p.Description })
+                .ToListAsync();
+
+            return Ok(images);
+        }
 
         [HttpGet(ApiRoutes.Photos.GetGalleriePhotosOfEnfant)]
         [Authorize(Roles = "owner,admin,employee,tutor")]

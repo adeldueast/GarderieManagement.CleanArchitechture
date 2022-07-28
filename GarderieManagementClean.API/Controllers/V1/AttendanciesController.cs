@@ -108,8 +108,8 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
             //NOTIFY ALL SUBSCRIBED CLIENTS 
-            Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId);
-            await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId).SendAsync("childAttendanceUpdate", dto_attendance);
+            
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
 
             return Ok(dto_attendance);
 
@@ -140,8 +140,8 @@ namespace GarderieManagementClean.API.Controllers.V1
             attendance.LeftAt = DateTime.Now;
             await _context.SaveChangesAsync();
             var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
-            Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId);
-            await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId).SendAsync("childAttendanceUpdate", dto_attendance);
+      
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
             return Ok(dto_attendance);
 
 
@@ -197,8 +197,8 @@ namespace GarderieManagementClean.API.Controllers.V1
             _context.Add(attendance);
             await _context.SaveChangesAsync();
             var dto_attendance = _mapper.Map<AttendanceResponse>(attendance);
-            Request.Headers.TryGetValue("x-signalr-connection", out var signalRConnectionId);
-            await _hubContext.Clients.GroupExcept(HttpContext.GetUserGarderieId(), signalRConnectionId).SendAsync("childAttendanceUpdate", dto_attendance);
+         
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childAttendanceUpdate", dto_attendance);
             return Ok(dto_attendance);
 
         }

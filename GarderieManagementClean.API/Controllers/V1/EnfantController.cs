@@ -52,7 +52,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 }
 
                 result.Data = _mapper.Map<EnfantResponse>(result.Data);
-
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
                 return CreatedAtAction(nameof(getEnfantById), new { enfantId = (result.Data as EnfantResponse).Id }, result);
 
 
@@ -215,7 +215,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 {
                     return BadRequest(result);
                 }
-
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
                 return Ok(result);
             }
             catch (Exception e)
@@ -240,7 +240,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 {
                     return BadRequest(result);
                 }
-
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
                 return Ok(result);
             }
             catch (Exception e)

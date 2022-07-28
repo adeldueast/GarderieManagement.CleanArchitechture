@@ -174,6 +174,10 @@
 
             public const string GetAllGalleriePhotos = Base + photos + "Gallerie/Get";
 
+
+            public const string GetAllGaleriePhotoOfEnfantsOfTutor = Base + photos + "Gallerie/Get/Tutor";
+
+
             public const string GetGalleriePhotosOfEnfant = Base + photos + "Gallerie/Get/{enfantId:int}";
 
 

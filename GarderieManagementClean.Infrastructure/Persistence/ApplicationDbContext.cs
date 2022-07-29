@@ -34,6 +34,8 @@ namespace GarderieManagementClean.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+
+        
             
             modelBuilder.Entity<TutorEnfant>()
                 .HasKey(te => new { te.EnfantId, te.ApplicationUserId });
@@ -42,10 +44,12 @@ namespace GarderieManagementClean.Infrastructure.Persistence
                 .HasMany(p => p.Enfants)
                 .WithMany(e => e.Photos);
 
+
             modelBuilder.Entity<Photo>()
                .HasOne(p => p.PhotoCouvertureDe)
                .WithOne(e => e.PhotoCouverture)
-               .HasForeignKey<Photo>(p=>p.EnfantId);
+               .HasForeignKey<Photo>(p => p.EnfantId)
+               .OnDelete(DeleteBehavior.SetNull);
 
             //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-6.0#add-all-user-navigation-properties
             modelBuilder.Entity<ApplicationUser>(b =>

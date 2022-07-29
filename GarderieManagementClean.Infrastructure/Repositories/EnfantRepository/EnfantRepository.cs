@@ -223,7 +223,13 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 };
             }
 
-            var enfant = await _context.Enfants.SingleOrDefaultAsync(x => x.Id == EnfantId && x.GarderieId == user.GarderieId);
+            var enfant = await _context.Enfants
+                .Include(e => e.PhotoCouverture)
+                .Include(e => e.Photos)
+                .ThenInclude(p => p.Enfants)
+                .SingleOrDefaultAsync(x => x.Id == EnfantId && x.GarderieId == user.GarderieId);
+
+
             if (enfant == null)
             {
                 return new Result<Enfant>
@@ -232,6 +238,18 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                 };
             }
 
+
+            if(enfant.PhotoCouverture != null)
+            {
+                _context.Remove(enfant.PhotoCouverture);
+            }
+            foreach (var galleriePhotos in enfant.Photos)
+            {
+                if (galleriePhotos.Enfants.Count < 2)
+                {
+                    _context.Remove(galleriePhotos);
+                }
+            }
             _context.Remove(enfant);
             await _context.SaveChangesAsync();
 
@@ -263,8 +281,8 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     hasArrived = x.Attendances.Any(attendance => attendance.ArrivedAt.Value.Date == DateTime.Now.Date && !attendance.LeftAt.HasValue),
                     Group = x.Group.Name,
                     HexColor = x.Group.HexColor,
-                    PhotoCouverture = x.PhotoCouverture != null ? x.PhotoCouverture.Id : null 
-                    
+                    PhotoCouverture = x.PhotoCouverture != null ? x.PhotoCouverture.Id : null
+
 
                 })
                 .ToListAsync();
@@ -306,7 +324,7 @@ namespace GarderieManagementClean.Infrastructure.Repositories.EnfantRepository
                     x.Tutors.Select(te => te.ApplicationUser).Contains(user)
                     );
 
-              
+
 
 
             }

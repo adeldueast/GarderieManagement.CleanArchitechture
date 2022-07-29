@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,15 +21,17 @@ namespace GarderieManagementClean.Domain.Entities
 
 
 
+        //A photo either has a list of children because it is of type gallerie
         public virtual List<Enfant> Enfants { get; set; }
 
 
+        //or it has one child relation because it is a profile picture
 
         public int? EnfantId { get; set; }
-        public virtual Enfant? PhotoCouvertureDe { get; set; }
+        public virtual Enfant PhotoCouvertureDe { get; set; }
 
 
-        //public bool isPhotoCouverture { get => this.PhotoCouvertureDe != null; }
+     
 
     }
 }

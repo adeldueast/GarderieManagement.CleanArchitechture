@@ -3,6 +3,7 @@ using Contracts.Dtos.Request;
 using Contracts.Dtos.Response;
 using Contracts.Response;
 using GarderieManagementClean.API.Extensions;
+using GarderieManagementClean.API.HubConfig;
 using GarderieManagementClean.Application.Interfaces;
 using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Domain.Entities;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -22,10 +24,13 @@ namespace GarderieManagementClean.API.Controllers.V1
         private readonly IGroupService _groupService;
         private readonly IMapper _mapper;
 
-        public GroupController(IGroupService groupService, IMapper mapper)
+        private readonly IHubContext<ChildrenHub> _hubContext;
+
+        public GroupController(IGroupService groupService, IMapper mapper, IHubContext<ChildrenHub> hubContext)
         {
             _groupService = groupService;
             _mapper = mapper;
+            _hubContext = hubContext;
         }
 
         [Authorize(Roles = "owner,admin,employee")]
@@ -78,6 +83,8 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
 
             result.Data = _mapper.Map<GroupResponse>(result.Data);
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("groupsChanges", $"a group  was updated");
+
             return Ok(result);
 
         }
@@ -100,6 +107,8 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
 
             result.Data = _mapper.Map<GroupResponse>(result.Data);
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("groupsChanges", $"a group  was updated");
+
             return Ok(result);
         }
 
@@ -117,6 +126,9 @@ namespace GarderieManagementClean.API.Controllers.V1
                 return BadRequest(result);
 
             }
+
+            await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("groupsChanges", $"a group  was updated");
+
             return Ok(result);
 
 

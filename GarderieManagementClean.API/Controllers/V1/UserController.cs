@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using Contracts.Dtos;
 using GarderieManagementClean.API.Extensions;
+using GarderieManagementClean.API.HubConfig;
 using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,13 +18,16 @@ namespace GarderieManagementClean.API.Controllers.V1
 
     [ApiController]
     public class UserController : ControllerBase
+        
     {
+ 
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         public UserController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
             _mapper = mapper;
+        
         }
 
 

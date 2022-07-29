@@ -52,6 +52,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 }
 
                 result.Data = _mapper.Map<EnfantResponse>(result.Data);
+
                 await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
                 return CreatedAtAction(nameof(getEnfantById), new { enfantId = (result.Data as EnfantResponse).Id }, result);
 
@@ -220,7 +221,8 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
             catch (Exception e)
             {
-
+                //{"The DELETE statement conflicted with the REFERENCE constraint \"FK_Photos_Enfants_EnfantId\".
+                //The conflict occurred in database \"Garderie.Management.Clean\", table \"dbo.Photos\", column 'EnfantId'.\r\nThe statement has been terminated."}
                 return StatusCode(500, e.Message);
             }
         }

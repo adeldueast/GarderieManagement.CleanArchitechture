@@ -40,6 +40,12 @@ namespace GarderieManagementClean.API.Controllers.V1
             _userManager = userManager;
             _hubContext = hubContext;
             _notificationService = notificationService;
+
+
+         
+
+
+
         }
 
 
@@ -48,6 +54,8 @@ namespace GarderieManagementClean.API.Controllers.V1
         public async Task<IActionResult> PostCouvertureEnfant([FromRoute] int enfantId)
         {
             var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
+
+  
 
             var enfant = await _context.Enfants
               .Include(e => e.PhotoCouverture)

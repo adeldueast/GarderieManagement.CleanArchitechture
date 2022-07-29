@@ -2,12 +2,14 @@
 using Contracts.Request;
 using Contracts.Response;
 using GarderieManagementClean.API.Extensions;
+using GarderieManagementClean.API.HubConfig;
 using GarderieManagementClean.Application.Interfaces;
 using GarderieManagementClean.Application.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -20,11 +22,13 @@ namespace GarderieManagementClean.API.Controllers.V1
     [ApiController]
     public class AuthManagerController : ControllerBase
     {
+        private readonly IHubContext<ChildrenHub> _hubContext;
 
         private readonly IIdentityService _identityService;
-        public AuthManagerController(IIdentityService identityService)
+        public AuthManagerController(IIdentityService identityService, IHubContext<ChildrenHub> hubContext)
         {
             _identityService = identityService;
+            _hubContext = hubContext;
         }
 
 
@@ -111,6 +115,8 @@ namespace GarderieManagementClean.API.Controllers.V1
                 {
                     return BadRequest(result);
                 }
+                //Todo: notify employees about staff update
+               // await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
 
                 return Ok(result);
             }
@@ -138,6 +144,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 {
                     return BadRequest(result);
                 }
+                await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
 
                 return Ok(result);
             }

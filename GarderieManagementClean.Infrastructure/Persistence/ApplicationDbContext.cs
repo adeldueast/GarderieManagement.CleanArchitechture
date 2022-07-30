@@ -34,6 +34,7 @@ namespace GarderieManagementClean.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+            
 
         
             

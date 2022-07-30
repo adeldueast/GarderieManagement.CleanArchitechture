@@ -80,6 +80,11 @@ namespace GarderieManagementClean.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                var swaggerOptions = new SwaggerOptions();
+                Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
+                app.UseSwagger(options => { options.RouteTemplate = swaggerOptions.JsonRoute; });
+                app.UseSwaggerUI(options => options.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description));
             }
 
             //app.UseCors(o =>
@@ -101,10 +106,7 @@ namespace GarderieManagementClean.API
 
 
 
-            var swaggerOptions = new SwaggerOptions();
-            Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
-            app.UseSwagger(options => { options.RouteTemplate = swaggerOptions.JsonRoute; });
-            app.UseSwaggerUI(options => options.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description));
+       
 
             app.UseEndpoints(endpoints =>
             {

@@ -30,6 +30,8 @@ namespace GarderieManagementClean.Domain.Entities
         public int EnfantId { get; set; }
         public virtual Enfant Enfant { get; set; }
 
+    
+
 
         #region
         //this is the one to one relation with ApplicationUser

@@ -49,6 +49,16 @@ namespace GarderieManagementClean.Infrastructure.Identity
         public async Task<Result<Authentication>> RegisterOwnerAsync(UserRegistrationRequest userRegistrationRequest)
         {
 
+            // we have to manullay check if email is null Or empty because we actually allow certain users with no email (tutors/guardians)
+
+            if (string.IsNullOrEmpty(userRegistrationRequest.Email))
+            {
+                return new Result<Authentication>()
+                {
+                    Success = false,
+                    Errors = new List<string>() { $"Couldn't create user because email was not provided" }
+                };
+            }
 
             var newUser = new ApplicationUser
             {
@@ -106,6 +116,15 @@ namespace GarderieManagementClean.Infrastructure.Identity
 
         public async Task<Result<object>> InviteUser(string userId, UserInviteUserRequest inviteUserRequest)
         {
+            // we have to manullay check if email is null Or empty because we actually allow certain users with no email (tutors/guardians)
+            if (string.IsNullOrEmpty(inviteUserRequest.Email))
+            {
+                return new Result<object>()
+                {
+                    Success = false,
+                    Errors = new List<string>() { $"Couldn't invite user because email was not provided" }
+                };
+            }
 
             var loggedInUser = await _userManager.FindByIdAsync(userId);
             if (loggedInUser.GarderieId is null)
@@ -224,14 +243,14 @@ namespace GarderieManagementClean.Infrastructure.Identity
             }
 
             //check if email is already used
-            var user = await _userManager.FindByEmailAsync(inviteUserRequest.Email);
-            if (user != null)
-            {
-                return new Result<object>()
-                {
-                    Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because email is already used." }
-                };
-            }
+            //var user = await _userManager.FindByEmailAsync(inviteUserRequest.Email);
+            //if (user != null)
+            //{
+            //    return new Result<object>()
+            //    {
+            //        Errors = new List<string>() { $"Failed to invite user '{inviteUserRequest.Email}', because email is already used." }
+            //    };
+            //}
 
 
             //check if role is a valid Role (exist)
@@ -246,13 +265,17 @@ namespace GarderieManagementClean.Infrastructure.Identity
             }
 
 
-
+            var hasAccount = inviteUserRequest.HasAnAccount ? true : false;
             var newUser = new ApplicationUser
             {
                 FirstName = inviteUserRequest.FirstName,
                 LastName = inviteUserRequest.LastName,
-                Email = inviteUserRequest.Email,
-                UserName = inviteUserRequest.Email,
+                Email = hasAccount
+                            ? inviteUserRequest.Email
+                            : null,
+                UserName = hasAccount
+                            ? inviteUserRequest.Email
+                            : null,
                 GarderieId = currentUser.GarderieId,
 
                 hasAccount = inviteUserRequest.HasAnAccount ? true : false
@@ -569,7 +592,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
             var claims = new List<Claim>
             {
                 new Claim("Id", user.Id),
-                new Claim("GarderieId", user.GarderieId == null ? Guid.NewGuid().ToString(): user.GarderieId.ToString() ),
+                new Claim("GarderieId", user.GarderieId == null ? "": user.GarderieId.ToString() ),
 
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("FirstName", user.FirstName is  not null ? user.FirstName:""),

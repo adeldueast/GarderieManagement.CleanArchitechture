@@ -192,7 +192,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
                 //NOTIFY ALL SUBSCRIBED CLIENTS 
                 await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", result.Data);
-
+                    
                 return Ok(result);
             }
             catch (Exception e)

@@ -110,6 +110,8 @@ namespace GarderieManagementClean.API.Extensions
 
         public static void ConfigureIdentity(this IServiceCollection services)
         {
+            //services.AddTransient<IUserValidator<ApplicationUser>, OptionalEmailUserValidator<MonotypeIdentityUser>>();
+            services.AddTransient<IUserValidator<ApplicationUser>, OptionalEmailUserValidator<ApplicationUser>>();
 
             //Identity
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -119,11 +121,14 @@ namespace GarderieManagementClean.API.Extensions
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
-
+                
                 options.User.RequireUniqueEmail = true;
+               
+
                 //options.SignIn.RequireConfirmedEmail = true;
 
             })
+            //.AddUserValidator<OptionalEmailUserValidator<ApplicationUser>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 

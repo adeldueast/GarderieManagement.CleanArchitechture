@@ -109,7 +109,7 @@ namespace GarderieManagementClean.API.Extensions
                 string connStr;
                 if (env == "Development")
                 {
-                    connStr = config.GetConnectionString("DefaultConnectionDev");
+                    connStr = config.GetConnectionString(@"DefaultConnectionDev");
 
                 }
                 else if (env == "Production")
@@ -119,7 +119,7 @@ namespace GarderieManagementClean.API.Extensions
                 }
                 else
                 {
-                    connStr = config.GetConnectionString("DefaultConnectionDev");
+                    connStr = config.GetConnectionString(@"DefaultConnectionDev");
                 }
 
                 options.UseLazyLoadingProxies();

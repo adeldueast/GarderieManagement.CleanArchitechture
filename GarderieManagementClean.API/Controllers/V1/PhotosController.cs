@@ -300,8 +300,10 @@ namespace GarderieManagementClean.API.Controllers.V1
                 return NotFound($"Photo {id} does not exist");
             }
 
+            var systemPath = System.AppContext.BaseDirectory;
+            var filePath = $"{systemPath}sm//" + photo.FileName;
             var file = $"C:/images/{size}/{photo.FileName}";
-            var bytes = System.IO.File.ReadAllBytes(file);
+            var bytes = System.IO.File.ReadAllBytes(filePath);
 
             return File(bytes, photo.MimeType);
             //return new FileStreamResult(new FileStream(file, FileMode.Open), photo.MimeType);

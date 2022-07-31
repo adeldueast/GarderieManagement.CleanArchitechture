@@ -23,7 +23,7 @@ namespace GarderieManagementClean.API
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                   await  Seeder.Seeder.Seed(context);
+                    await Seeder.Seeder.SetAllUsersOffline(context);
                 }
                 catch (Exception ex)
                 {

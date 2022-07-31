@@ -100,12 +100,34 @@ namespace GarderieManagementClean.API.Extensions
 
         public static void ConfigureApplicationDbContext(this IServiceCollection services, IConfiguration config)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             // ApplicationDbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
+
+                var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                string connStr;
+                if (env == "Development")
+                {
+                    connStr = config.GetConnectionString("DefaultConnectionDev");
+
+                }
+                else if (env == "Production")
+                {
+                    connStr = config.GetConnectionString("DefaultConnectionProd");
+
+                }
+                else
+                {
+                    connStr = config.GetConnectionString("DefaultConnectionDev");
+                }
+
                 options.UseLazyLoadingProxies();
-                options.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(connStr);
+
+
             });
+
         }
 
         public static void ConfigureIdentity(this IServiceCollection services)

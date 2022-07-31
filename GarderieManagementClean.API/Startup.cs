@@ -87,14 +87,7 @@ namespace GarderieManagementClean.API
                 app.UseSwaggerUI(options => options.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description));
             }
 
-            //app.UseCors(o =>
-            //{
-            //    o.AllowAnyHeader();
-            //    o.AllowAnyMethod();
-            //    o.AllowAnyOrigin();
-            //});
-
-
+          
 
             app.UseCors("CorsPolicy");
 

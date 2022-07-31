@@ -1,5 +1,6 @@
 ﻿using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,10 +35,37 @@ namespace GarderieManagementClean.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
-            
 
-        
-            
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "bdfb0164-d8ee-46e6-8eab-c0a3d7a1fa2b",
+                    Name = "owner",
+                    ConcurrencyStamp = "1",
+                    NormalizedName = "OWNER"
+                },
+                new IdentityRole
+                {
+                    Id = "8175996e-0eb2-4d60-9cb9-9f1575cedffc",
+                    Name = "admin",
+                    ConcurrencyStamp = "2",
+                    NormalizedName = "ADMIN"
+                }, new IdentityRole
+                {
+                    Id = "00af114b-a523-4718-bdff-e539404775db",
+                    Name = "employee",
+                    ConcurrencyStamp = "3",
+                    NormalizedName = "EMPLOYEE"
+                }, new IdentityRole
+                {
+                    Id = "ef771148-39c6-4fc6-8aeb-59800edc3cac",
+                    Name = "tutor",
+                    ConcurrencyStamp = "4",
+                    NormalizedName = "TUTOR"
+                }
+              );
+
+
             modelBuilder.Entity<TutorEnfant>()
                 .HasKey(te => new { te.EnfantId, te.ApplicationUserId });
 

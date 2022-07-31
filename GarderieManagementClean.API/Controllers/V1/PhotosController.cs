@@ -42,7 +42,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             _notificationService = notificationService;
 
 
-         
+
 
 
 
@@ -55,7 +55,7 @@ namespace GarderieManagementClean.API.Controllers.V1
         {
             var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
 
-  
+
 
             var enfant = await _context.Enfants
               .Include(e => e.PhotoCouverture)
@@ -213,17 +213,26 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         private static void SaveImages(Image image, Photo photo)
         {
-            // image.Save($"{lg.FullName}" + photo.FileName);
-            image.Save($"C://images//lg//" + photo.FileName);
+            var systemPath = System.AppContext.BaseDirectory;
+            System.IO.Directory.CreateDirectory($"{systemPath}lg");
+            System.IO.Directory.CreateDirectory($"{systemPath}md");
+            System.IO.Directory.CreateDirectory($"{systemPath}sm");
+
+            var filePath = $"{systemPath}lg//" + photo.FileName;
+            image.Save(filePath);
+
+            //  image.Save($"C://images//lg//" + photo.FileName);
+
+
             image.Mutate(i =>
             i.Resize(new ResizeOptions()
             {
                 Mode = ResizeMode.Min,
                 Size = new Size() { Height = 720 }
             }));
-            //  image.Save($"{md.FullName} " + photo.FileName);
-            image.Save($"C://images//md//" + photo.FileName);
-
+            filePath = $"{systemPath}md//" + photo.FileName;
+            image.Save(filePath);
+            //  image.Save($"C://images//md//" + photo.FileName);
 
 
             image.Mutate(i =>
@@ -232,9 +241,9 @@ namespace GarderieManagementClean.API.Controllers.V1
                 Mode = ResizeMode.Min,
                 Size = new Size() { Height = 320 }
             }));
-
-            // image.Save($"{sm.FullName}" + photo.FileName);
-            image.Save($"C://images//sm//" + photo.FileName);
+            filePath = $"{systemPath}sm//" + photo.FileName;
+            image.Save(filePath);
+            // image.Save($"C://images//sm//" + photo.FileName);
         }
 
         [Authorize(Roles = "owner,admin,employee,tutor")]

@@ -275,7 +275,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, ex.InnerException);
             }
 
         }

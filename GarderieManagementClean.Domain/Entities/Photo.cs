@@ -30,8 +30,8 @@ namespace GarderieManagementClean.Domain.Entities
         public int? EnfantId { get; set; }
         public virtual Enfant PhotoCouvertureDe { get; set; }
 
+        public string cloudId { get; set; }
 
-     
 
     }
 }

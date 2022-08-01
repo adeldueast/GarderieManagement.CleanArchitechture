@@ -1,4 +1,5 @@
-﻿using GarderieManagementClean.API.Options;
+﻿using B2Net.Models;
+using GarderieManagementClean.API.Options;
 using GarderieManagementClean.Application.Implementation;
 using GarderieManagementClean.Application.Interfaces;
 using GarderieManagementClean.Application.Interfaces.Repositories;
@@ -143,9 +144,9 @@ namespace GarderieManagementClean.API.Extensions
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
-                
+
                 options.User.RequireUniqueEmail = true;
-               
+
 
                 //options.SignIn.RequireConfirmedEmail = true;
 
@@ -184,6 +185,8 @@ namespace GarderieManagementClean.API.Extensions
 
         public static void AddServicesAndRepositories(this IServiceCollection services, IConfiguration configuration)
         {
+
+
 
             //identity service/repository
             services.AddScoped<IIdentityService, IdentityService>();
@@ -235,8 +238,17 @@ namespace GarderieManagementClean.API.Extensions
             jwtSettings = new JwtSettings();
             configuration.Bind(nameof(jwtSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
+
+
         }
 
+
+        public static void AddBackBlazeClientSingleton(this IServiceCollection services, IConfiguration configuration)
+        {
+            var B2Options = new B2Options();
+            configuration.Bind(nameof(B2Options), B2Options);
+            services.AddSingleton(B2Options);
+        }
         public static void ConfigureAuthentification(this IServiceCollection services, IConfiguration configuration, JwtSettings jwtSettings)
         {
 

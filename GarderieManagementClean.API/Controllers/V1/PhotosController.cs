@@ -1,4 +1,6 @@
-﻿using GarderieManagementClean.API.Extensions;
+﻿using B2Net;
+using B2Net.Models;
+using GarderieManagementClean.API.Extensions;
 using GarderieManagementClean.API.HubConfig;
 using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Domain.Entities;
@@ -10,11 +12,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GarderieManagementClean.API.Controllers.V1
@@ -24,28 +30,28 @@ namespace GarderieManagementClean.API.Controllers.V1
     [Authorize]
     public class PhotosController : ControllerBase
     {
+      
         private readonly ApplicationDbContext _context;
-
+        private readonly B2Options _b2Options;
         private readonly INotificationService _notificationService;
+
+        private static B2Client _b2Client;
 
         private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly IHubContext<ChildrenHub> _hubContext;
 
-
-
-        public PhotosController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IHubContext<ChildrenHub> hubContext, INotificationService notificationService)
+        private readonly IHttpClientFactory _httpClientFactory;
+        public PhotosController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IHubContext<ChildrenHub> hubContext, INotificationService notificationService, B2Options b2Options, IHttpClientFactory httpClientFactory)
         {
             _context = context;
             _userManager = userManager;
             _hubContext = hubContext;
             _notificationService = notificationService;
+            _b2Options = b2Options;
 
-
-
-
-
-
+            _b2Client = new B2Client(b2Options);
+            _httpClientFactory = httpClientFactory;
         }
 
 
@@ -71,30 +77,43 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             if (enfant.PhotoCouverture != null)
             {
-                enfant.PhotoCouverture = null;
+
+
+                //delete the existing file from the cloud
+                var file = await _b2Client.Files.Delete($"{enfant.PhotoCouverture.cloudId}", $"md/{enfant.PhotoCouverture.FileName}");
+                _context.Remove(enfant.PhotoCouverture);
+
             }
 
             try
             {
                 IFormCollection formCollection = await Request.ReadFormAsync();
                 IFormFile file = formCollection.Files.GetFile("files");
-                Image image = Image.Load(file.OpenReadStream());
+                Image image = Image.Load(file.OpenReadStream(), out IImageFormat format);
+
+
+
 
                 Photo photo = new Photo()
                 {
                     PhotoCouvertureDe = enfant,
                     FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName),
-                    MimeType = file.ContentType
+                    MimeType = file.ContentType,
+
                 };
 
+                await SaveImageInCloudAsync(image, photo, format);
 
-                SaveImages(image, photo);
-
-
+                //new photo was uploaded 
                 _context.Photos.Add(photo);
                 await _context.SaveChangesAsync();
                 await _hubContext.Clients.Group(HttpContext.GetUserGarderieId()).SendAsync("childUpdate", $"gallerie was updated");
                 return Ok(photo.Id);
+
+
+
+
+
 
             }
             catch (Exception ex)
@@ -113,8 +132,6 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             //Get logged in user
             var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
-
-
 
             try
             {
@@ -153,7 +170,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                 ICollection<Photo> photos = new List<Photo>();
                 foreach (var file in files)
                 {
-                    Image image = Image.Load(file.OpenReadStream());
+                    Image image = Image.Load(file.OpenReadStream(), out IImageFormat format);
                     Photo photo = new Photo()
                     {
                         Description = input.Description,
@@ -162,7 +179,7 @@ namespace GarderieManagementClean.API.Controllers.V1
                         MimeType = file.ContentType
                     };
 
-                    SaveImages(image, photo);
+                    await SaveImageInCloudAsync(image, photo, format);
                     photos.Add(photo);
                     _context.Photos.Add(photo);
 
@@ -211,39 +228,29 @@ namespace GarderieManagementClean.API.Controllers.V1
 
         }
 
-        private static void SaveImages(Image image, Photo photo)
+        private async Task SaveImageInCloudAsync(Image image, Photo photo, IImageFormat format)
         {
-            var systemPath = System.AppContext.BaseDirectory;
-            System.IO.Directory.CreateDirectory($"{systemPath}lg");
-            System.IO.Directory.CreateDirectory($"{systemPath}md");
-            System.IO.Directory.CreateDirectory($"{systemPath}sm");
 
-            var filePath = $"{systemPath}lg//" + photo.FileName;
-            image.Save(filePath);
-
-            //  image.Save($"C://images//lg//" + photo.FileName);
-
-
+            //Transorm the size of the image
             image.Mutate(i =>
             i.Resize(new ResizeOptions()
             {
                 Mode = ResizeMode.Min,
                 Size = new Size() { Height = 720 }
             }));
-            filePath = $"{systemPath}md//" + photo.FileName;
-            image.Save(filePath);
-            //  image.Save($"C://images//md//" + photo.FileName);
 
+            //Save the image in a memorystream  so we can send the memorystream's bytes in upload request
+            using var ms = new MemoryStream();
+            image.Save(ms, format);
 
-            image.Mutate(i =>
-            i.Resize(new ResizeOptions()
-            {
-                Mode = ResizeMode.Min,
-                Size = new Size() { Height = 320 }
-            }));
-            filePath = $"{systemPath}sm//" + photo.FileName;
-            image.Save(filePath);
-            // image.Save($"C://images//sm//" + photo.FileName);
+            var bucketId = _b2Options.BucketId;
+            var uploadUrl = await _b2Client.Files.GetUploadUrl();
+
+            //upload the file to the cloud
+            var file = await _b2Client.Files.Upload(fileData: ms.ToArray(), fileName: $"md/{photo.FileName}", contentType: photo.MimeType, uploadUrl: uploadUrl, autoRetry: false);
+
+            photo.cloudId = file.FileId;
+
         }
 
         [Authorize(Roles = "owner,admin,employee,tutor")]
@@ -300,17 +307,42 @@ namespace GarderieManagementClean.API.Controllers.V1
                 return NotFound($"Photo {id} does not exist");
             }
 
+<<<<<<< HEAD
             var systemPath = System.AppContext.BaseDirectory;
             var filePath = $"{systemPath}sm//" + photo.FileName;
             var file = $"C:/images/{size}/{photo.FileName}";
             var bytes = System.IO.File.ReadAllBytes(filePath);
+=======
+>>>>>>> development
 
-            return File(bytes, photo.MimeType);
-            //return new FileStreamResult(new FileStream(file, FileMode.Open), photo.MimeType);
+
+            var response = await GetImageFromCloudFlare(photo);
+            if (response.IsSuccessStatusCode)
+            {
+                var fileBytes = await response.Content.ReadAsByteArrayAsync();
+                return File(await response.Content.ReadAsByteArrayAsync(), photo.MimeType);
+            }
+
+            return NotFound();
+
+
+
+
         }
 
+        [NonAction]
+        public async Task<HttpResponseMessage> GetImageFromCloudFlare(Photo photo)
+        {
+            var uri = new Uri($"https://photos.garderie-management.company/file/garderie-management/md/{photo.FileName}");
+            var request = new HttpRequestMessage(HttpMethod.Get, uri);
 
+            var httpClient = _httpClientFactory.CreateClient();
 
+            var response = await httpClient.SendAsync(request);
+
+            return response;
+
+        }
         [HttpGet(ApiRoutes.Photos.GetAllGalleriePhotos)]
         [Authorize(Roles = "owner,admin,employee")]
         public async Task<IActionResult> getPhotoIdsOfAllEnfants()

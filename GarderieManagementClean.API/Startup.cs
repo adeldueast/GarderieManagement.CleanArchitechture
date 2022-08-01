@@ -47,6 +47,12 @@ namespace GarderieManagementClean.API
             //Controllers
             services.ConfigureControllers();
 
+            //black balze client
+            services.AddBackBlazeClientSingleton(Configuration);
+
+            // Add services to the container.
+            services.AddHttpClient();
+
             //JwtSettings Singleton
             services.AddSingletonJwtSettings(Configuration, out JwtSettings jwtSettings);
 

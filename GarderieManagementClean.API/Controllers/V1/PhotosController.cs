@@ -307,13 +307,12 @@ namespace GarderieManagementClean.API.Controllers.V1
                 return NotFound($"Photo {id} does not exist");
             }
 
-<<<<<<< HEAD
+
             var systemPath = System.AppContext.BaseDirectory;
             var filePath = $"{systemPath}sm//" + photo.FileName;
             var file = $"C:/images/{size}/{photo.FileName}";
             var bytes = System.IO.File.ReadAllBytes(filePath);
-=======
->>>>>>> development
+
 
 
             var response = await GetImageFromCloudFlare(photo);

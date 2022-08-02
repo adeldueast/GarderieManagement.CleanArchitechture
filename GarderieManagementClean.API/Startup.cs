@@ -15,12 +15,14 @@ namespace GarderieManagementClean.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+         ;
         }
 
         public IConfiguration Configuration { get; }
+        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -51,13 +53,14 @@ namespace GarderieManagementClean.API
             services.ConfigureControllers();
 
             //black balze client
-            services.AddBackBlazeClientSingleton(Configuration);
+            services.ConfigureSecretSingletons(Configuration, out JwtSettings jwtSettings);
+           
 
             // Add services to the container.
             services.AddHttpClient();
 
             //JwtSettings Singleton
-            services.AddSingletonJwtSettings(Configuration, out JwtSettings jwtSettings);
+           // services.AddSingletonJwtSettings(Configuration );
 
             //JWT Authentification configuration (Jwt Bearer)
             services.ConfigureAuthentification(Configuration, jwtSettings);

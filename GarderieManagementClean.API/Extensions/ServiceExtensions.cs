@@ -18,6 +18,7 @@ using GarderieManagementClean.Infrastructure.Repositories.JournalRepository;
 using GarderieManagementClean.Infrastructure.Repositories.NotificationRepository;
 using GarderieManagementClean.Infrastructure.Repositories.UserRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -89,12 +90,12 @@ namespace GarderieManagementClean.API.Extensions
         {
             services.AddCors(options =>
             {
-                
-                 options.AddPolicy("CorsPolicy", builder =>
-                 {
-                     builder.WithOrigins().AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true) // allow any origin
-                    .AllowCredentials().Build();
-                 });
+
+                options.AddPolicy("CorsPolicy", builder =>
+                {
+                    builder.WithOrigins().AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true) // allow any origin
+                   .AllowCredentials().Build();
+                });
             });
         }
 
@@ -110,12 +111,13 @@ namespace GarderieManagementClean.API.Extensions
                 string connStr;
                 if (env == "Development")
                 {
-                    connStr = config.GetConnectionString(@"DefaultConnectionDev");
+                    connStr = config.GetConnectionString("DefaultConnectionDev");
 
                 }
                 else if (env == "Production")
                 {
-                    connStr = config.GetConnectionString("DefaultConnectionProd");
+
+                    connStr = Environment.GetEnvironmentVariable("DefaultConnectionProd");
 
                 }
                 else
@@ -243,10 +245,35 @@ namespace GarderieManagementClean.API.Extensions
         }
 
 
-        public static void AddBackBlazeClientSingleton(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureSecretSingletons(this IServiceCollection services, IConfiguration _config, out JwtSettings jwtSettings)
         {
-            var B2Options = new B2Options();
-            configuration.Bind(nameof(B2Options), B2Options);
+
+            bool isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+
+            B2Options B2Options = new B2Options();
+            jwtSettings = new JwtSettings();
+            if (isProduction)
+            {
+
+
+
+                B2Options.KeyId = Environment.GetEnvironmentVariable("B2OptionsKeyId");
+                B2Options.ApplicationKey = Environment.GetEnvironmentVariable("B2OptionsApplicationKey");
+                B2Options.BucketId = Environment.GetEnvironmentVariable("B2OptionsBucketId");
+                B2Options.PersistBucket = true;
+
+                jwtSettings.Secret = Environment.GetEnvironmentVariable("JwtSecret");
+
+            }
+            else
+            {
+
+                _config.Bind(nameof(B2Options), B2Options);
+                _config.Bind(nameof(jwtSettings), jwtSettings);
+            }
+
+
+            services.AddSingleton(jwtSettings);
             services.AddSingleton(B2Options);
         }
         public static void ConfigureAuthentification(this IServiceCollection services, IConfiguration configuration, JwtSettings jwtSettings)

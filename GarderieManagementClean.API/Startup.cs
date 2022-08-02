@@ -104,7 +104,7 @@ namespace GarderieManagementClean.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChildrenHub>("/Children");
+                endpoints.MapHub<ChildrenHub>("/api/v1/Children");
             });
         }
     }

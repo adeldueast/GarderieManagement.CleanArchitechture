@@ -89,12 +89,12 @@ namespace GarderieManagementClean.API.Extensions
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("CorsPolicy",
-                    builder => builder
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    );
+                
+                 options.AddPolicy("CorsPolicy", builder =>
+                 {
+                     builder.WithOrigins().AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true) // allow any origin
+                    .AllowCredentials().Build();
+                 });
             });
         }
 

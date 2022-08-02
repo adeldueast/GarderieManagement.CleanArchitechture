@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
+		<UserSecretsId>b77497d1-4481-4abb-bad5-938c7137c5bb</UserSecretsId>
 	</PropertyGroup>
 
 	<Target Name="PrePublishTarget" AfterTargets="Publish">

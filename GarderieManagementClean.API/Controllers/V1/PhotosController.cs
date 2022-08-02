@@ -6,11 +6,13 @@ using GarderieManagementClean.Application.Interfaces.Services;
 using GarderieManagementClean.Domain.Entities;
 using GarderieManagementClean.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Processing;
@@ -30,12 +32,13 @@ namespace GarderieManagementClean.API.Controllers.V1
     [Authorize]
     public class PhotosController : ControllerBase
     {
-      
+
         private readonly ApplicationDbContext _context;
         private readonly B2Options _b2Options;
         private readonly INotificationService _notificationService;
 
         private static B2Client _b2Client;
+
 
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -52,11 +55,14 @@ namespace GarderieManagementClean.API.Controllers.V1
 
             _b2Client = new B2Client(b2Options);
             _httpClientFactory = httpClientFactory;
+
         }
+
 
 
         [Authorize(Roles = "owner,admin,employee")]
         [HttpPost(ApiRoutes.Photos.PostCouvertureEnfant)]
+        [DisableRequestSizeLimit]
         public async Task<IActionResult> PostCouvertureEnfant([FromRoute] int enfantId)
         {
             var user = await _userManager.FindByIdAsync(HttpContext.GetUserId());
@@ -79,7 +85,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             {
 
 
-                //delete the existing file from the cloud
+                ////delete the existing file from the cloud
                 var file = await _b2Client.Files.Delete($"{enfant.PhotoCouverture.cloudId}", $"md/{enfant.PhotoCouverture.FileName}");
                 _context.Remove(enfant.PhotoCouverture);
 
@@ -282,10 +288,11 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, ex.InnerException);
             }
 
         }
+        [NonAction]
         private async Task<IActionResult> returnFileIfAuthorized(Photo photo, ApplicationUser user, string size, int id)
         {
             //Get the user's roles
@@ -309,6 +316,8 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
+
+
             var response = await GetImageFromCloudFlare(photo);
             if (response.IsSuccessStatusCode)
             {
@@ -317,6 +326,7 @@ namespace GarderieManagementClean.API.Controllers.V1
             }
 
             return NotFound();
+
 
 
 

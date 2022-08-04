@@ -1,6 +1,7 @@
 ﻿using Contracts.Dtos.Request;
 using Contracts.Request;
 using GarderieManagementClean.Application.Models;
+using GarderieManagementClean.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +26,9 @@ namespace GarderieManagementClean.Application.Interfaces
         public Task<Result<Authentication>> RefreshTokenAsync(UserRefreshTokenRequest refreshTokenRequest);
 
         public Task<Result<object>> InviteTutor(string userId, UserInviteTutorRequest inviteTutorRequest);
-    
 
+
+        public Task<Result<Authentication>> GenerateAuthResult(ApplicationUser user);
 
         public Task<object> RevokeTokensAsync(string userId);
 

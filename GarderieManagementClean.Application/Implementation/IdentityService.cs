@@ -2,6 +2,7 @@
 using Contracts.Request;
 using GarderieManagementClean.Application.Interfaces;
 using GarderieManagementClean.Application.Models;
+using GarderieManagementClean.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,6 +68,11 @@ namespace GarderieManagementClean.Application.ServicesImplementation
         {
             var result = await _identityRepository.CompleteRegistration(completeRegistrationRequest);
             return result;
+        }
+
+        public async Task<Result<Authentication>> GenerateAuthResult(ApplicationUser user)
+        {
+            return await _identityRepository.GenerateAuthResult(user); ;
         }
     }
 }

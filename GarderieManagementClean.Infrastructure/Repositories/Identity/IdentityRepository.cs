@@ -98,17 +98,20 @@ namespace GarderieManagementClean.Infrastructure.Identity
             // await _emailService.SendEmailAsync(newUser.Email, "Email confirmation", EmailConfirmationToken, newUser.Id);
 
 
-            return new Result<Authentication>
-            {
-                Success = true,
-                Data = new
-                {
-                    Message = "Registrated successfuly"
-                    //Message = "Registrated successfuly, please confirm your email.",
-                    //UserId = newUser.Id,
-                    //ConfirmEmailToken = EmailConfirmationToken
-                }
-            };
+            //return new Result<Authentication>
+            //{
+            //    Success = true,
+            //    Data = new
+            //    {
+            //        Message = "Registrated successfuly"
+            //        //Message = "Registrated successfuly, please confirm your email.",
+            //        //UserId = newUser.Id,
+            //        //ConfirmEmailToken = EmailConfirmationToken
+            //    }
+            //};
+
+
+            return await GenerateAuthResult(newUser);
 
 
 
@@ -388,7 +391,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
             //}
 
             //create jwtToken & refreshToken for successful login 
-            return await GenerateAuthResult(existingUser); ;
+            return await GenerateAuthResult(existingUser); 
         }
 
 
@@ -630,7 +633,7 @@ namespace GarderieManagementClean.Infrastructure.Identity
         }
 
         //Generate AccessToken && RefreshToken
-        private async Task<Result<Authentication>> GenerateAuthResult(ApplicationUser user)
+        public async Task<Result<Authentication>> GenerateAuthResult(ApplicationUser user)
         {
 
 
@@ -675,6 +678,8 @@ namespace GarderieManagementClean.Infrastructure.Identity
                 .AddSeconds(utcExpiryDate).ToUniversalTime();
             return dateTimeValue;
         }
+
+   
         #endregion
     }
 }

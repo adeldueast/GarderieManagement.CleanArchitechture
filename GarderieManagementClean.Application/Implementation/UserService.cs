@@ -18,25 +18,26 @@ namespace GarderieManagementClean.Application.Implementation
             _userRepository = userRepository;
         }
 
-        public Task<Result<ApplicationUser>> getAllChildsTutors(string userId, int enfantId)
+        public async Task<Result<ApplicationUser>> getAllChildsTutors(string userId, int enfantId)
         {
-            return _userRepository.getAllChildsTutors(userId, enfantId);
+            return await _userRepository.getAllChildsTutors(userId, enfantId);
         }
 
-        public Task<Result<ApplicationUser>> getAllEmployee(string userId)
+        public async Task<Result<ApplicationUser>> getAllEmployee(string userId)
         {
-            return _userRepository.getAllEmployee(userId);
+            return await _userRepository.getAllEmployee(userId);
         }
 
-        public Task<Result<ApplicationUser>> getAllEmployeeWithNoGroup(string userId)
+        public async Task<Result<ApplicationUser>> getAllEmployeeWithNoGroup(string userId)
         {
-            return _userRepository.getAllEmployeeWithNoGroup(userId);
+            return await _userRepository.getAllEmployeeWithNoGroup(userId);
 
         }
 
-        public Task<Result<ApplicationUser>> getAllTutors(string userId)
+        public async Task<Result<ApplicationUser>> getAllTutors(string userId)
         {
-            return _userRepository.getAllTutors(userId);
+            return await _userRepository.getAllTutors(userId);
         }
+    
     }
 }

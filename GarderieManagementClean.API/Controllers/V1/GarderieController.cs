@@ -3,11 +3,13 @@ using Contracts.Request;
 using Contracts.Response;
 using GarderieManagementClean.API.Extensions;
 using GarderieManagementClean.Application.Interfaces;
+using GarderieManagementClean.Application.Models;
 using GarderieManagementClean.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -19,11 +21,14 @@ namespace GarderieManagementClean.API.Controllers.V1
     {
 
         private readonly IGarderieService _garderieService;
+        private readonly IIdentityService _identityService;
+
         private readonly IMapper _mapper;
-        public GarderieController(IGarderieService garderieService, IMapper mapper)
+        public GarderieController(IGarderieService garderieService, IMapper mapper, IIdentityService identityService)
         {
             _garderieService = garderieService;
             _mapper = mapper;
+            _identityService = identityService;
         }
 
 
@@ -67,7 +72,10 @@ namespace GarderieManagementClean.API.Controllers.V1
             //var garderieReponse = _mapper.Map<GarderieResponse>(garderieDomain);
             if (result.Success)
             {
+                var newAccessToken = ((await _identityService.GenerateAuthResult((result.Data as Garderie).ApplicationUsers.First())).Data as Authentication).AccessToken;
+
                 result.Data = _mapper.Map<GarderieResponse>(result.Data);
+                (result.Data as GarderieResponse).AccessToken = newAccessToken;
                 return Ok(result);
             }
             return BadRequest(result);
@@ -76,7 +84,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [Authorize( Roles = "owner")]
+        [Authorize(Roles = "owner")]
         [HttpPut(ApiRoutes.Garderie.Update)]
         public async Task<IActionResult> UpdateGarderie([FromBody] GarderieCreateRequest updatedGarderieRequest)
         {
@@ -102,7 +110,7 @@ namespace GarderieManagementClean.API.Controllers.V1
 
 
 
-        [Authorize( Roles = "owner")]
+        [Authorize(Roles = "owner")]
         [HttpPost(ApiRoutes.Garderie.Delete)]
         public async Task<IActionResult> DeleteGarderie()
         {

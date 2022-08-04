@@ -14,5 +14,7 @@ namespace Contracts.Response
         public string Name { get; set; }
 
         public AddressDTO Address { get; set; }
+
+        public string AccessToken { get; set; }
     }
 }

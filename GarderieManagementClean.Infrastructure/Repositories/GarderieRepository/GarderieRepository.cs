@@ -86,16 +86,18 @@ namespace GarderieManagementClean.Infrastructure.Repositories
             {
                 Name = newGarderie.Name,
                 Address = newGarderie.Address,
+                ApplicationUsers = new List<ApplicationUser>() { user }
+
             };
 
-             _context.Garderies.Add(newGarderie);
-            user.Garderie = newGarderie;
+            _context.Garderies.Add(garderie);
+            //user.Garderie = newGarderie;
             await _context.SaveChangesAsync();
 
             return new Result<Garderie>()
             {
                 Success = true,
-                Data = newGarderie
+                Data = garderie
             };
 
         }

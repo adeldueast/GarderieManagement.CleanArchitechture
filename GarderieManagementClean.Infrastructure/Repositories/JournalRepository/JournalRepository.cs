@@ -72,8 +72,9 @@ namespace GarderieManagementClean.Infrastructure.Repositories.JournalRepository
 
                     };
 
-                    
+
                     _context.JournalDeBords.Add(newJournal);
+                    await _context.SaveChangesAsync();
                     Notification notification1 = new Notification
                     {
                         CreatedAt = DateTime.Now,
